@@ -566,7 +566,7 @@ export default function EnterpriseStockToolbox() {
   ]
 
   const handleForumClick = () => {
-    window.open("http://forum.company.com", "_blank")
+    window.open("http://10.106.19.29:8090/", "_blank")
   }
 
   const handlePlatformUrlChange = (id: string, newUrl: string) => {
