@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -39,134 +39,51 @@ export default function EnterpriseStockToolbox() {
   const [newItemType, setNewItemType] = useState("platform");
 
   // 管理平台配置
-  const [managementPlatforms, setManagementPlatforms] = useState<
-    PlatformItem[]
-  >([
-    {
-      id: "ainews",
-      name: "AINEWS运营管理",
-      description: "AI新闻内容管理和发布平台",
-      icon: getIconByName("FileText"),
-      iconName: "FileText",
-      status: "运行中",
-      url: "/ainews-admin",
-      color: "bg-blue-500",
-    },
-    {
-      id: "indicators",
-      name: "指标服务管理",
-      description: "金融指标数据服务运营管理",
-      icon: getIconByName("BarChart3"),
-      iconName: "BarChart3",
-      status: "运行中",
-      url: "/indicators-admin",
-      color: "bg-green-500",
-    },
-    {
-      id: "f9menu",
-      name: "F9菜单管理",
-      description: "F9快捷菜单配置和权限管理",
-      icon: getIconByName("Settings"),
-      iconName: "Settings",
-      status: "运行中",
-      url: "/f9menu-admin",
-      color: "bg-purple-500",
-    },
-    {
-      id: "research",
-      name: "券商研报权限",
-      description: "定制券商研报访问权限管理",
-      icon: getIconByName("Shield"),
-      iconName: "Shield",
-      status: "运行中",
-      url: "/research-admin",
-      color: "bg-orange-500",
-    },
-    {
-      id: "docparser",
-      name: "DocParser密钥管理",
-      description: "文档解析服务API密钥管理",
-      icon: getIconByName("Key"),
-      iconName: "Key",
-      status: "运行中",
-      url: "/docparser-admin",
-      color: "bg-red-500",
-    },
-    {
-      id: "enti",
-      name: "ENTI管理员设置",
-      description: "企业实体管理员权限配置",
-      icon: getIconByName("Users"),
-      iconName: "Users",
-      status: "运行中",
-      url: "/enti-admin",
-      color: "bg-indigo-500",
-    },
-    {
-      id: "email",
-      name: "邮件订阅管理",
-      description: "邮件订阅服务运营管理",
-      icon: getIconByName("Mail"),
-      iconName: "Mail",
-      status: "运行中",
-      url: "/email-admin",
-      color: "bg-pink-500",
-    },
-    {
-      id: "prompt",
-      name: "Prompt管理平台",
-      description: "AI提示词模板管理和优化",
-      icon: getIconByName("Code"),
-      iconName: "Code",
-      status: "运行中",
-      url: "/prompt-admin",
-      color: "bg-teal-500",
-    },
-  ]);
+  const [managementPlatforms, setManagementPlatforms] = useState<PlatformItem[]>([]);
 
   // 技术服务工具
-  const [techServices, setTechServices] = useState<ServiceItem[]>([
-    {
-      id: "ocean",
-      name: "Ocean服务",
-      description: "海量数据处理服务",
-      icon: getIconByName("Database"),
-      iconName: "Database",
-      url: "/ocean",
-    },
-    {
-      id: "cloud",
-      name: "Cloud服务",
-      description: "云计算资源管理",
-      icon: getIconByName("Cloud"),
-      iconName: "Cloud",
-      url: "/cloud",
-    },
-    {
-      id: "wss",
-      name: "WSS指标服务",
-      description: "WebSocket实时指标推送",
-      icon: getIconByName("Zap"),
-      iconName: "Zap",
-      url: "/wss",
-    },
-    {
-      id: "rag",
-      name: "RAG服务",
-      description: "检索增强生成服务",
-      icon: getIconByName("Globe"),
-      iconName: "Globe",
-      url: "/rag",
-    },
-    {
-      id: "html2img",
-      name: "HTML转图工具",
-      description: "HTML页面转图片工具",
-      icon: getIconByName("FileText"),
-      iconName: "FileText",
-      url: "/html2img",
-    },
-  ]);
+  const [techServices, setTechServices] = useState<ServiceItem[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const resPlatform = await fetch('/api/platforms?type=platform');
+        if (resPlatform.ok) {
+          const data = await resPlatform.json();
+          setManagementPlatforms(
+            data.map((item: any) => ({
+              id: item.service_code,
+              name: item.service_name,
+              description: item.service_description,
+              icon: getIconByName(item.icon_name),
+              iconName: item.icon_name,
+              status: item.is_visible ? '运行中' : '停用',
+              url: item.service_url,
+              color: item.color_class,
+            }))
+          );
+        }
+        const resService = await fetch('/api/platforms?type=service');
+        if (resService.ok) {
+          const data = await resService.json();
+          setTechServices(
+            data.map((item: any) => ({
+              id: item.service_code,
+              name: item.service_name,
+              description: item.service_description,
+              icon: getIconByName(item.icon_name),
+              iconName: item.icon_name,
+              url: item.service_url,
+              color: item.color_class,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    load();
+  }, []);
 
   const handleAddNew = (type: string) => {
     setNewItemType(type);
