@@ -172,7 +172,11 @@ mysql -u username -p database_name < database/init.sql
 cp .env.example .env
 
 # 配置数据库连接
-DATABASE_URL="mysql://username:password@localhost:3306/database_name"
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=123456
+DB_NAME=stock_lab
 ```
 
 5. **启动开发服务器**
