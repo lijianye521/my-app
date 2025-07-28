@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { savePlatformService, deletePlatformService, getDb } from '@/lib/db';
+import { savePlatformService, deletePlatformService, getDb, updatePlatformServiceOrder } from '@/lib/db';
 
 // 获取平台/服务列表
 export async function GET(request: NextRequest) {
@@ -93,6 +93,39 @@ export async function DELETE(request: NextRequest) {
     console.error('处理删除请求失败:', error);
     return NextResponse.json(
       { success: false, message: '处理删除请求失败', error },
+      { status: 500 }
+    );
+  }
+}
+
+// 处理PUT请求 - 更新排序
+export async function PUT(request: NextRequest) {
+  try {
+    const data = await request.json();
+
+    // 验证必填字段
+    if (!data.items || !Array.isArray(data.items) || !data.type) {
+      return NextResponse.json(
+        { success: false, message: '缺少必要字段' },
+        { status: 400 }
+      );
+    }
+
+    // 更新排序
+    const result = await updatePlatformServiceOrder(data.items, data.type);
+
+    if (result.success) {
+      return NextResponse.json({ success: true, message: '排序更新成功' });
+    } else {
+      return NextResponse.json(
+        { success: false, message: '数据库操作失败', error: result.error },
+        { status: 500 }
+      );
+    }
+  } catch (error) {
+    console.error('处理请求失败:', error);
+    return NextResponse.json(
+      { success: false, message: '处理请求失败', error },
       { status: 500 }
     );
   }

@@ -114,3 +114,33 @@ export async function deletePlatformService(id: string) {
     return { success: false, error };
   }
 }
+
+// 更新平台/服务排序
+export async function updatePlatformServiceOrder(items: {id: string, sortOrder: number}[], type: 'platform' | 'service') {
+  const db = await getDb();
+  
+  try {
+    // 开启事务
+    await db.query('START TRANSACTION');
+    
+    // 批量更新排序
+    for (const item of items) {
+      await db.query(
+        `UPDATE platform_services 
+         SET sort_order = ? 
+         WHERE service_code = ? AND service_type = ?`,
+        [item.sortOrder, item.id, type]
+      );
+    }
+    
+    // 提交事务
+    await db.query('COMMIT');
+    
+    return { success: true };
+  } catch (error) {
+    // 回滚事务
+    await db.query('ROLLBACK');
+    console.error('更新排序失败:', error);
+    return { success: false, error };
+  }
+}
