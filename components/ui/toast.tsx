@@ -5,6 +5,9 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// 添加这个类型定义，与use-toast.ts中保持一致
+type ExtendedToastType = "background" | "foreground" | "default" | "destructive" | "success";
+
 const ToastProvider = ToastPrimitives.Provider
 
 const ToastViewport = React.forwardRef<
@@ -32,9 +35,17 @@ const toastVariants = cva(
           "destructive group border-destructive bg-destructive text-destructive-foreground",
         success: "border-green-500 bg-green-500 text-white",
       },
+      type: {
+        background: "border bg-background text-foreground",
+        foreground: "border bg-foreground text-background", 
+        default: "border bg-background text-foreground",
+        destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
+        success: "border-green-500 bg-green-500 text-white",
+      } as Record<ExtendedToastType, string>,
     },
     defaultVariants: {
       variant: "default",
+      type: "foreground",
     },
   }
 )
@@ -43,11 +54,11 @@ const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
     VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
+>(({ className, variant, type, ...props }, ref) => {
   return (
     <ToastPrimitives.Root
       ref={ref}
-      className={cn(toastVariants({ variant }), className)}
+      className={cn(toastVariants({ variant, type }), className)}
       {...props}
     />
   )

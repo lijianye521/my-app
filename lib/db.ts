@@ -31,6 +31,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   multipleStatements: true,
+  connectTimeout: 30000, // 增加连接超时时间到30秒
 });
 
 // 打印数据库连接信息
@@ -71,23 +72,42 @@ export async function checkDatabaseConnection() {
 }
 
 export async function initializeDatabase() {
-  const connection = await pool.getConnection();
-  try {
-    console.log(`创建数据库(如不存在): ${dbConfig.database}`);
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\``);
-    await connection.query(`USE \`${dbConfig.database}\``);
-    const initSqlPath = path.join(process.cwd(), 'database', 'init.sql');
-    const sql = await fs.readFile(initSqlPath, 'utf8');
-    // mysql2 by default does not support multiple statements without this option
-    console.log('初始化数据库表结构...');
-    await connection.query(sql);
-    console.log('数据库初始化完成');
-  } catch (error) {
-    console.error('数据库初始化失败:', error);
-    throw error;
-  } finally {
-    connection.release();
+  let retries = 3;
+  let lastError = null;
+
+  while (retries > 0) {
+    try {
+      console.log(`尝试连接数据库 (剩余尝试次数: ${retries})...`);
+      const connection = await pool.getConnection();
+      
+      try {
+        console.log(`创建数据库(如不存在): ${dbConfig.database}`);
+        await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\``);
+        await connection.query(`USE \`${dbConfig.database}\``);
+        const initSqlPath = path.join(process.cwd(), 'database', 'init.sql');
+        const sql = await fs.readFile(initSqlPath, 'utf8');
+        console.log('初始化数据库表结构...');
+        await connection.query(sql);
+        console.log('数据库初始化完成');
+        return; // 成功后直接返回
+      } finally {
+        connection.release();
+      }
+    } catch (error: any) {
+      lastError = error;
+      console.error(`数据库连接尝试 ${4 - retries}/3 失败:`, error.message || error);
+      retries--;
+      if (retries > 0) {
+        // 等待一段时间再重试
+        console.log(`将在 5 秒后重试...`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    }
   }
+  
+  // 所有重试都失败后抛出最后一个错误
+  console.error('所有数据库连接尝试均失败，请检查数据库配置和网络连接。');
+  throw lastError;
 }
 
 export async function getDb() {
@@ -100,6 +120,7 @@ export async function getDb() {
     waitForConnections: true,
     connectionLimit: 10,
     multipleStatements: true,
+    connectTimeout: 30000, // 增加连接超时时间到30秒
   });
 }
 

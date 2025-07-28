@@ -6,7 +6,8 @@ import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 3000
 
-type ToastType = "default" | "destructive" | "success"
+// 修改ToastType，增加更多支持的类型
+type ToastType = "default" | "destructive" | "success" | "background" | "foreground"
 
 type ToastState = {
   id: string
@@ -146,15 +147,11 @@ function toast({ ...props }: Toast) {
     type: "ADD_TOAST",
     toast: {
       ...props,
-      id,
       open: true,
-      onOpenChange: (open: boolean) => {
-        if (!open) dismiss()
-      },
+      // @ts-expect-error: 允许id属性用于toast
+      id,
     },
   })
-
-  // 添加自动关闭逻辑
   setTimeout(() => {
     dismiss();
   }, TOAST_REMOVE_DELAY);
