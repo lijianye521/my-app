@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
+import AuthNotification from "@/components/AuthNotification";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -17,25 +17,34 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
+  
+  // 通知状态
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!username || !password || !confirmPassword) {
-      toast({
-        title: "错误",
-        description: "请填写所有必填字段",
-        type: "destructive",
+      setNotification({
+        show: true,
+        title: "注册失败",
+        message: "请填写所有必填字段",
+        type: "error"
       });
       return;
     }
     
     if (password !== confirmPassword) {
-      toast({
-        title: "错误",
-        description: "两次输入的密码不一致",
-        type: "destructive",
+      setNotification({
+        show: true,
+        title: "注册失败",
+        message: "两次输入的密码不一致",
+        type: "error"
       });
       return;
     }
@@ -62,18 +71,23 @@ export default function RegisterPage() {
         throw new Error(data.message || "注册失败");
       }
       
-      toast({
+      setNotification({
+        show: true,
         title: "注册成功",
-        description: "请使用您的新账号登录",
-        type: "success",
+        message: "请使用您的新账号登录",
+        type: "success"
       });
       
-      router.push("/login");
+      // 短暂延迟后跳转，以便看到成功消息
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
     } catch (error: any) {
-      toast({
+      setNotification({
+        show: true,
         title: "注册失败",
-        description: error.message || "请稍后重试",
-        type: "destructive",
+        message: error.message || "请稍后重试",
+        type: "error"
       });
     } finally {
       setLoading(false);
@@ -82,6 +96,15 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      {notification && notification.show && (
+        <AuthNotification
+          title={notification.title}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+    
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">注册账号</CardTitle>

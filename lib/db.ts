@@ -33,15 +33,58 @@ const pool = mysql.createPool({
   multipleStatements: true,
 });
 
+// 打印数据库连接信息
+console.log(`数据库连接配置: ${dbConfig.host}:${dbConfig.port}, 用户: ${dbConfig.user}, 数据库: ${dbConfig.database}`);
+
+export async function checkDatabaseConnection() {
+  let connection;
+  try {
+    console.log('尝试连接数据库...');
+    connection = await pool.getConnection();
+    console.log('数据库连接成功!');
+    
+    // 获取数据库状态信息
+    const [serverStatus] = await connection.query('SHOW STATUS LIKE "Threads_connected"');
+    const [version] = await connection.query('SELECT VERSION() as version');
+    
+    console.log(`数据库版本: ${(version as any)[0].version}`);
+    console.log(`当前连接数: ${(serverStatus as any)[0].Value}`);
+    
+    return {
+      success: true,
+      message: '数据库连接正常',
+      host: dbConfig.host,
+      database: dbConfig.database,
+      version: (version as any)[0].version,
+      connections: (serverStatus as any)[0].Value
+    };
+  } catch (error) {
+    console.error('数据库连接失败:', error);
+    return {
+      success: false,
+      message: '数据库连接失败',
+      error: (error as Error).message
+    };
+  } finally {
+    if (connection) connection.release();
+  }
+}
+
 export async function initializeDatabase() {
   const connection = await pool.getConnection();
   try {
+    console.log(`创建数据库(如不存在): ${dbConfig.database}`);
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\``);
     await connection.query(`USE \`${dbConfig.database}\``);
     const initSqlPath = path.join(process.cwd(), 'database', 'init.sql');
     const sql = await fs.readFile(initSqlPath, 'utf8');
     // mysql2 by default does not support multiple statements without this option
+    console.log('初始化数据库表结构...');
     await connection.query(sql);
+    console.log('数据库初始化完成');
+  } catch (error) {
+    console.error('数据库初始化失败:', error);
+    throw error;
   } finally {
     connection.release();
   }
@@ -51,6 +94,7 @@ export async function getDb() {
   // Ensure DB and tables exist
   await initializeDatabase();
   // Return a pool configured with the database name
+  console.log(`创建连接池: ${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`);
   return mysql.createPool({
     ...dbConfig,
     waitForConnections: true,

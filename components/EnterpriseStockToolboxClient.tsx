@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -42,8 +42,25 @@ export default function EnterpriseStockToolboxClient({
   const [editingItem, setEditingItem] = useState<PlatformItem | ServiceItem | null>(null);
   const [newItemType, setNewItemType] = useState("platform");
 
+  console.log('EnterpriseStockToolboxClient接收数据:', { initialPlatforms, initialServices });
+
   const [managementPlatforms, setManagementPlatforms] = useState<PlatformItem[]>(initialPlatforms);
   const [techServices, setTechServices] = useState<ServiceItem[]>(initialServices);
+
+  useEffect(() => {
+    console.log('managementPlatforms状态更新:', managementPlatforms);
+    console.log('techServices状态更新:', techServices);
+  }, [managementPlatforms, techServices]);
+
+  // 更新组件初始化数据
+  useEffect(() => {
+    if (initialPlatforms?.length) {
+      setManagementPlatforms(initialPlatforms);
+    }
+    if (initialServices?.length) {
+      setTechServices(initialServices);
+    }
+  }, [initialPlatforms, initialServices]);
 
   const handleAddNew = (type: string) => {
     setNewItemType(type);

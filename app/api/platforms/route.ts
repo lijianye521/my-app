@@ -101,6 +101,105 @@ export async function PUT(request: Request) {
   }
 }
 
+// 处理POST请求 - 添加或更新平台/服务
+export async function POST(request: Request) {
+  try {
+    // 检查用户是否已登录
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json(
+        { message: "未授权访问" },
+        { status: 401 }
+      );
+    }
+    
+    const data = await request.json();
+    
+    // 验证必填字段
+    if (!data.id || !data.name || !data.url || !data.iconName || !data.color || !data.type) {
+      return NextResponse.json(
+        { message: "缺少必要字段" },
+        { status: 400 }
+      );
+    }
+    
+    const db = await getDb();
+    
+    if (data.isNew) {
+      // 新增记录
+      await db.query(
+        `INSERT INTO platform_services 
+        (service_code, service_name, service_description, service_type, icon_name, color_class, service_url) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [data.id, data.name, data.description || '', data.type, data.iconName, data.color, data.url]
+      );
+    } else {
+      // 更新记录
+      await db.query(
+        `UPDATE platform_services 
+        SET service_name = ?, 
+            service_description = ?, 
+            icon_name = ?, 
+            color_class = ?, 
+            service_url = ? 
+        WHERE service_code = ?`,
+        [data.name, data.description || '', data.iconName, data.color, data.url, data.id]
+      );
+    }
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('处理POST请求失败:', error);
+    return NextResponse.json(
+      { success: false, message: '处理POST请求失败' },
+      { status: 500 }
+    );
+  }
+}
+
+// 处理DELETE请求 - 删除平台/服务
+export async function DELETE(request: Request) {
+  try {
+    // 检查用户是否已登录
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json(
+        { message: "未授权访问" },
+        { status: 401 }
+      );
+    }
+    
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "缺少ID参数" },
+        { status: 400 }
+      );
+    }
+    
+    // 调用删除函数
+    const db = await getDb();
+    
+    // 删除记录
+    await db.query(
+      "DELETE FROM platform_services WHERE service_code = ?",
+      [id]
+    );
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('处理删除请求失败:', error);
+    return NextResponse.json(
+      { success: false, message: '处理删除请求失败' },
+      { status: 500 }
+    );
+  }
+}
+
 // 从db.ts导入此函数
 async function updatePlatformServiceOrder(items: {id: string, sortOrder: number}[], type: 'platform' | 'service') {
   const db = await getDb();

@@ -4,7 +4,7 @@ import * as React from "react"
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 5
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 3000
 
 type ToastType = "default" | "destructive" | "success"
 
@@ -153,6 +153,11 @@ function toast({ ...props }: Toast) {
       },
     },
   })
+
+  // 添加自动关闭逻辑
+  setTimeout(() => {
+    dismiss();
+  }, TOAST_REMOVE_DELAY);
 
   return {
     id,

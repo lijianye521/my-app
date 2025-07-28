@@ -25,6 +25,12 @@ export default function Dashboard({
     window.open("http://10.106.19.29:8090/", "_blank");
   };
 
+  console.log('Dashboard组件接收数据:', { 
+    managementPlatforms, 
+    techServicesLength: techServices?.length,
+    managementPlatformsLength: managementPlatforms?.length
+  });
+
   return (
     <div className="space-y-6">
       {/* 论坛大卡片 - 占据显著位置 */}
