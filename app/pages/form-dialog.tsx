@@ -34,7 +34,7 @@ export default function FormDialog({
     name: editingItem?.name || "",
     description: editingItem?.description || "",
     url: editingItem?.url || "",
-    icon: (editingItem as any)?.iconName || "Settings",
+    icon: editingItem?.iconName || "Settings",  // 修正这里，使用iconName
     color: editingItem?.color || "bg-blue-500",
   });
 
@@ -45,7 +45,7 @@ export default function FormDialog({
         name: editingItem.name || "",
         description: editingItem.description || "",
         url: editingItem.url || "",
-        icon: editingItem.iconName || "Settings",
+        icon: editingItem.iconName || "Settings",  // 修正这里，使用iconName
         color: editingItem.color || "bg-blue-500",
       });
     } else {
