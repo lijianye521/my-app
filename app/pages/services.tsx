@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, ExternalLink, Edit, Trash2, ArrowUpDown, Check } from "lucide-react";
+import { Plus, ExternalLink, Edit, Trash2, GripVertical, Check, ArrowDownWideNarrow } from "lucide-react";
 import { PageProps, ServiceItem, PlatformItem } from "./types";
 import { iconOptions } from "./data";
+import { useToast } from "@/components/ui/use-toast";
 import {
   DndContext,
   closestCenter,
@@ -61,6 +62,10 @@ function ServiceCard({ service }: { service: ServiceItem }) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
+              {/* 添加GripVertical图标，在拖拽覆盖层中显示 */}
+              <div className="mr-1 text-gray-400">
+                <GripVertical className="h-5 w-5" />
+              </div>
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <Icon className="h-6 w-6 text-white" />
               </div>
@@ -109,25 +114,22 @@ function SortableServiceItem({ service, isSorting, onEdit, onDelete }: SortableS
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0 : 1,  // 完全隐藏被拖动项
+    opacity: isDragging ? 0 : 1,  // 原位置确实需要隐藏
     zIndex: isDragging ? 1 : 0,
+    cursor: isSorting ? (isDragging ? 'grabbing' : 'grab') : 'default',
   };
   
   const Icon = getIconByName(service.iconName);
   
   return (
-    <div ref={setNodeRef} style={style} className="gradient-border touch-none">
+    <div ref={setNodeRef} style={style} className="gradient-border touch-none" {...attributes} {...listeners}>
       <Card className={`bg-white group ${isDragging ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {isSorting && (
-                <div 
-                  className="cursor-move mr-1 hover:bg-gray-100 rounded p-1 touch-none" 
-                  {...attributes} 
-                  {...listeners}
-                >
-                  <ArrowUpDown className="h-5 w-5 text-gray-400" />
+                <div className="mr-1 text-gray-400">
+                  <GripVertical className="h-5 w-5" />
                 </div>
               )}
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -194,6 +196,7 @@ export default function Services({
   const [isSorting, setIsSorting] = useState(false);
   const [sortedItems, setSortedItems] = useState([...techServices]);
   const [activeService, setActiveService] = useState<ServiceItem | null>(null);
+  const { toast } = useToast();
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -263,13 +266,24 @@ export default function Services({
         // 更新前端状态
         setTechServices(sortedItems);
         setIsSorting(false);
-        alert('排序更新成功');
+        toast({
+          title: "排序更新成功",
+          type: "success",
+        });
       } else {
-        alert(`排序更新失败: ${result.message}`);
+        toast({
+          title: "排序更新失败",
+          description: result.message,
+          type: "destructive",
+        });
       }
     } catch (error) {
       console.error('更新排序失败:', error);
-      alert('更新排序过程中发生错误，请查看控制台');
+      toast({
+        title: "更新失败",
+        description: "更新排序过程中发生错误，请查看控制台",
+        type: "destructive",
+      });
     }
   };
 
@@ -286,7 +300,7 @@ export default function Services({
             variant={isSorting ? "default" : "outline"}
             className={isSorting ? "bg-amber-600 hover:bg-amber-700" : ""}
           >
-            <ArrowUpDown className="h-4 w-4 mr-2" />
+            <ArrowDownWideNarrow className="h-4 w-4 mr-2" />
             {isSorting ? "取消排序" : "排序"}
           </Button>
           

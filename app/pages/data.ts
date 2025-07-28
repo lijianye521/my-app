@@ -153,6 +153,7 @@ import {
   Trash,
   Home,
   BookOpen,
+  GripVertical,
 } from "lucide-react";
 
 import { IconOption, ColorOption, MenuItem } from "./types";

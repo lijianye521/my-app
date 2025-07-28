@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TrendingUp, LogOut, User } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 
 import Dashboard from "@/app/pages/dashboard";
 import Platforms from "@/app/pages/platforms";
@@ -183,6 +184,16 @@ export default function EnterpriseStockToolboxClient({
     }
   };
 
+  // 获取会话信息
+  const { data: session } = useSession();
+  
+  // 处理退出登录
+  const handleLogout = async () => {
+    await signOut({ redirect: true, callbackUrl: "/login" });
+    // 额外的保险措施 - 直接使用window.location跳转
+    window.location.href = "/login";
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
@@ -237,12 +248,14 @@ export default function EnterpriseStockToolboxClient({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-2 py-1.5">
-                    <div className="font-medium">系统管理员</div>
-                    <div className="text-sm text-gray-500">admin@company.com</div>
-                    <div className="text-sm text-gray-500">域名: company.com</div>
+                    <div className="font-medium">{session?.user?.name || session?.user?.username || "用户"}</div>
+                    <div className="text-sm text-gray-500">{session?.user?.email || ""}</div>
+                    {session?.user?.id && (
+                      <div className="text-sm text-gray-500">ID: {session.user.id}</div>
+                    )}
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
                     退出登录
                   </DropdownMenuItem>
