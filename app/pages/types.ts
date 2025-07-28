@@ -19,7 +19,6 @@ export interface PlatformItem {
   id: string;
   name: string;
   description: string;
-  icon: React.ComponentType<LucideProps>;
   iconName: string;
   status: string;
   url: string;
@@ -31,7 +30,6 @@ export interface ServiceItem {
   id: string;
   name: string;
   description: string;
-  icon: React.ComponentType<LucideProps>;
   iconName: string;
   url: string;
   color?: string;

@@ -17,7 +17,7 @@ export interface DbConfig {
 const dbConfig: DbConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: Number(process.env.DB_PORT) || 3306,
-  user: process.env.DB_USER || 'root',
+  user: process.env.DB_USER || 'root2',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'stock_lab',
 };
@@ -57,4 +57,60 @@ export async function getDb() {
     connectionLimit: 10,
     multipleStatements: true,
   });
+}
+
+// 新增或更新平台/服务信息
+export async function savePlatformService(data: {
+  id: string;
+  name: string;
+  description: string;
+  iconName: string;
+  url: string;
+  color: string;
+  type: 'platform' | 'service';
+  isNew: boolean;
+}) {
+  const db = await getDb();
+  
+  try {
+    if (data.isNew) {
+      // 新增记录
+      await db.query(
+        `INSERT INTO platform_services 
+        (service_code, service_name, service_description, service_type, icon_name, color_class, service_url) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [data.id, data.name, data.description, data.type, data.iconName, data.color, data.url]
+      );
+    } else {
+      // 更新记录
+      await db.query(
+        `UPDATE platform_services 
+        SET service_name = ?, 
+            service_description = ?, 
+            icon_name = ?, 
+            color_class = ?, 
+            service_url = ? 
+        WHERE service_code = ?`,
+        [data.name, data.description, data.iconName, data.color, data.url, data.id]
+      );
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('数据库操作失败:', error);
+    return { success: false, error };
+  }
+}
+
+// 删除平台/服务信息
+export async function deletePlatformService(id: string) {
+  const db = await getDb();
+  
+  try {
+    await db.query('DELETE FROM platform_services WHERE service_code = ?', [id]);
+    return { success: true };
+  } catch (error) {
+    console.error('删除失败:', error);
+    return { success: false, error };
+  }
 }

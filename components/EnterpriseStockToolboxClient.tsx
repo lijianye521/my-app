@@ -56,46 +56,104 @@ export default function EnterpriseStockToolboxClient({
     setIsAddDialogOpen(true);
   };
 
-  const handleDelete = (id: string, type: string) => {
+  const handleDelete = async (id: string, type: string) => {
     if (confirm("确定要删除这个配置项吗？")) {
-      if (type === "platform") {
-        setManagementPlatforms((prev) => prev.filter((item) => item.id !== id));
-      } else {
-        setTechServices((prev) => prev.filter((item) => item.id !== id));
+      try {
+        // 调用API删除数据
+        const response = await fetch(`/api/platforms?id=${id}`, {
+          method: 'DELETE',
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // UI更新
+          if (type === "platform") {
+            setManagementPlatforms((prev) => prev.filter((item) => item.id !== id));
+          } else {
+            setTechServices((prev) => prev.filter((item) => item.id !== id));
+          }
+          
+          alert("删除成功");
+        } else {
+          alert(`删除失败: ${result.message}`);
+        }
+      } catch (error) {
+        console.error("删除出错:", error);
+        alert("删除过程中发生错误，请查看控制台");
       }
     }
   };
 
-  const handleFormSubmit = (formData: FormDataType) => {
-    const iconComponent = getIconByName(formData.icon);
-    const newItem = {
-      id: editingItem?.id || Date.now().toString(),
-      name: formData.name,
-      description: formData.description,
-      url: formData.url,
-      icon: iconComponent,
-      iconName: formData.icon,
-      color: formData.color,
-      status: "运行中",
-    };
+  const handleFormSubmit = async (formData: FormDataType) => {
+    try {
+      const isNew = !editingItem;
+      const id = editingItem?.id || formData.name.toLowerCase().replace(/\s/g, '_');
+      
+      const requestData = {
+        id,
+        name: formData.name,
+        description: formData.description,
+        iconName: formData.icon,
+        url: formData.url,
+        color: formData.color,
+        type: newItemType,
+        isNew
+      };
+      
+      // 调用API保存数据
+      const response = await fetch('/api/platforms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // 创建新项
+        const newItem = {
+          id,
+          name: formData.name,
+          description: formData.description,
+          iconName: formData.icon,
+          url: formData.url,
+          color: formData.color,
+          status: "运行中",
+        };
 
-    if (editingItem) {
-      if (newItemType === "platform") {
-        setManagementPlatforms((prev) =>
-          prev.map((item) => (item.id === editingItem.id ? newItem : item))
-        );
+        // UI更新
+        if (editingItem) {
+          if (newItemType === "platform") {
+            setManagementPlatforms((prev) =>
+              prev.map((item) => (item.id === editingItem.id ? newItem : item))
+            );
+          } else {
+            setTechServices((prev) =>
+              prev.map((item) => (item.id === editingItem.id ? newItem : item))
+            );
+          }
+        } else {
+          if (newItemType === "platform") {
+            setManagementPlatforms((prev) => [...prev, newItem]);
+          } else {
+            setTechServices((prev) => [...prev, newItem]);
+          }
+        }
+        
+        alert(isNew ? "添加成功" : "更新成功");
       } else {
-        setTechServices((prev) =>
-          prev.map((item) => (item.id === editingItem.id ? newItem : item))
-        );
+        alert(`保存失败: ${result.message}`);
       }
-    } else {
-      if (newItemType === "platform") {
-        setManagementPlatforms((prev) => [...prev, newItem]);
-      } else {
-        setTechServices((prev) => [...prev, newItem]);
-      }
+    } catch (error) {
+      console.error("保存出错:", error);
+      alert("保存过程中发生错误，请查看控制台");
     }
+    
+    // 关闭对话框
+    setIsAddDialogOpen(false);
   };
 
   const renderContent = () => {

@@ -9,6 +9,13 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { PageProps } from "./types";
+import { iconOptions } from "./data";
+
+// 获取图标组件
+const getIconByName = (iconName: string) => {
+  const iconOption = iconOptions.find((option) => option.value === iconName);
+  return iconOption ? iconOption.icon : iconOptions[0].icon;
+};
 
 export default function Dashboard({
   managementPlatforms,
@@ -92,7 +99,7 @@ export default function Dashboard({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {managementPlatforms.slice(0, 6).map((platform) => {
-              const Icon = platform.icon;
+              const Icon = getIconByName(platform.iconName);
               return (
                 <div
                   key={platform.id}
@@ -128,7 +135,7 @@ export default function Dashboard({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {techServices.map((service) => {
-              const Icon = service.icon;
+              const Icon = getIconByName(service.iconName);
               return (
                 <div
                   key={service.id}

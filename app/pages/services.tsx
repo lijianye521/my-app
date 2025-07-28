@@ -3,6 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, ExternalLink, Edit, Trash2 } from "lucide-react";
 import { PageProps } from "./types";
+import { iconOptions } from "./data";
+
+// 获取图标组件
+const getIconByName = (iconName: string) => {
+  const iconOption = iconOptions.find((option) => option.value === iconName);
+  return iconOption ? iconOption.icon : iconOptions[0].icon;
+};
 
 // Wind终端专用的页面启动函数
 function launch(params: string) {
@@ -34,7 +41,7 @@ export default function Services({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {techServices.map((service) => {
-          const Icon = service.icon;
+          const Icon = getIconByName(service.iconName);
           return (
             <div key={service.id} className="gradient-border">
               <Card className="bg-white group">

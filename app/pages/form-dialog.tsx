@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +37,22 @@ export default function FormDialog({
     icon: (editingItem as any)?.iconName || "Settings",
     color: editingItem?.color || "bg-blue-500",
   });
+
+  // 添加useEffect，当editingItem变化时重新设置表单数据
+  useEffect(() => {
+    if (editingItem) {
+      setFormData({
+        name: editingItem.name || "",
+        description: editingItem.description || "",
+        url: editingItem.url || "",
+        icon: editingItem.iconName || "Settings",
+        color: editingItem.color || "bg-blue-500",
+      });
+    } else {
+      // 当创建新项目时重置表单
+      resetForm();
+    }
+  }, [editingItem]);
 
   const resetForm = () => {
     setFormData({
