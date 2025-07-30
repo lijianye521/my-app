@@ -1,5 +1,5 @@
 import CredentialsProvider from "next-auth/providers/credentials";
-import { compare } from "bcrypt";
+import { compare } from "bcryptjs";
 import { getDb } from "@/lib/db";
 import type { NextAuthOptions } from "next-auth";
 
