@@ -110,7 +110,7 @@ export default function Dashboard({
                 <div
                   key={platform.id}
                   className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer group"
-                  onClick={() => window.open(platform.url, "_blank")}
+                  onClick={() => window.location.href = "windlocal://open?" + encodeURIComponent(platform.url)}
                 >
                   <div
                     className={`w-10 h-10 ${platform.color} rounded-lg flex items-center justify-center`}
@@ -146,7 +146,7 @@ export default function Dashboard({
                 <div
                   key={service.id}
                   className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer group"
-                  onClick={() => window.open(service.url, "_blank")}
+                  onClick={() => window.location.href = "windlocal://open?" + encodeURIComponent(service.url)}
                 >
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                     <Icon className="h-5 w-5 text-white" />

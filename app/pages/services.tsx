@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, ExternalLink, Edit, Trash2, GripVertical, Check, ArrowDownWideNarrow } from "lucide-react";
+import { Plus, ExternalLink, Edit, Trash2, GripVertical, Check, ArrowDownWideNarrow, AlertCircle, CheckCircle2 } from "lucide-react";
 import { PageProps, ServiceItem, PlatformItem } from "./types";
 import { iconOptions } from "./data";
-import { useToast } from "@/components/ui/use-toast";
+import toast from "react-hot-toast";
 import {
   DndContext,
   closestCenter,
@@ -196,7 +196,6 @@ export default function Services({
   const [isSorting, setIsSorting] = useState(false);
   const [sortedItems, setSortedItems] = useState([...techServices]);
   const [activeService, setActiveService] = useState<ServiceItem | null>(null);
-  const { toast } = useToast();
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -266,23 +265,18 @@ export default function Services({
         // 更新前端状态
         setTechServices(sortedItems);
         setIsSorting(false);
-        toast({
-          title: "排序更新成功",
-          type: "success",
+        toast.success('服务排序更新成功', {
+          icon: '👍',
         });
       } else {
-        toast({
-          title: "排序更新失败",
-          description: result.message,
-          type: "destructive",
+        toast.error(result.message || '保存排序时发生错误', {
+          icon: '❌',
         });
       }
     } catch (error) {
       console.error('更新排序失败:', error);
-      toast({
-        title: "更新失败",
-        description: "更新排序过程中发生错误，请查看控制台",
-        type: "destructive",
+      toast.error('更新排序过程中发生错误，请查看控制台', {
+        icon: '❌',
       });
     }
   };

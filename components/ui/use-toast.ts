@@ -143,18 +143,26 @@ function toast({ ...props }: Toast) {
     })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
+  // 将完整的toast状态添加到ADD_TOAST操作中，避免类型错误
   dispatch({
     type: "ADD_TOAST",
     toast: {
       ...props,
       open: true,
-      // @ts-expect-error: 允许id属性用于toast
-      id,
     },
   })
-  setTimeout(() => {
-    dismiss();
-  }, TOAST_REMOVE_DELAY);
+  
+  // 确保toast会自动消失
+  // 创建并存储timeout以便于管理
+  const timeoutId = setTimeout(() => {
+    dismiss()
+    // 额外再添加一个延时确保完全移除
+    setTimeout(() => {
+      dispatch({ type: "REMOVE_TOAST", toastId: id })
+    }, 300)
+  }, TOAST_REMOVE_DELAY)
+  
+  toastTimeouts.set(id, timeoutId)
 
   return {
     id,

@@ -19,8 +19,7 @@ export function Toaster() {
         return (
           <Toast 
             key={id}
-            // 直接传递类型，toast.tsx内部已经支持所有需要的类型
-            type={type as any}
+            type={type as any} // 使用类型断言来解决类型不匹配问题
             {...props}
           >
             <div className="grid gap-1">
