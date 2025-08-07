@@ -20,7 +20,6 @@ const nextConfig = {
     allowedDevOrigins: ['10.100.244.58', '10.106.19.29'],
   },
   poweredByHeader: false,
-  swcMinify: true,
 
   async headers() {
     return [
