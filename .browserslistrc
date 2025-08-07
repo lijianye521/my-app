@@ -1,0 +1,21 @@
+# 支持的浏览器列表
+# 这个配置会让构建工具生成兼容这些浏览器的代码
+
+# 市场份额超过0.5%的浏览器
+> 0.5%
+# 近两个版本的主流浏览器
+last 2 versions
+# Firefox ESR版本
+Firefox ESR
+# 排除已经不再接收安全更新的浏览器
+not dead
+# 排除IE11
+not IE 11
+# 明确包含较旧的Edge版本
+Edge >= 18
+# 包含较旧的Chrome版本
+Chrome >= 70
+# 包含较旧的Firefox版本
+Firefox >= 68
+# 包含较旧的Safari版本
+Safari >= 13 

@@ -36,6 +36,8 @@ export async function GET() {
       status: item.is_visible ? "运行中" : "停用",
       url: item.service_url,
       color: item.color_class,
+      urlType: item.url_type,
+      otherInformation: item.other_information,
     }));
 
     const services = (serviceRows as any[]).map((item) => ({
@@ -45,6 +47,8 @@ export async function GET() {
       iconName: item.icon_name,
       url: item.service_url,
       color: item.color_class,
+      urlType: item.url_type,
+      otherInformation: item.other_information,
     }));
     
     return NextResponse.json({
@@ -117,7 +121,7 @@ export async function POST(request: Request) {
     const data = await request.json();
     
     // 验证必填字段
-    if (!data.id || !data.name || !data.url || !data.iconName || !data.color || !data.type) {
+    if (!data.id || !data.name || !data.url || !data.iconName || !data.color || !data.type || !data.urlType) {
       return NextResponse.json(
         { message: "缺少必要字段" },
         { status: 400 }
@@ -130,9 +134,9 @@ export async function POST(request: Request) {
       // 新增记录
       await db.query(
         `INSERT INTO platform_services 
-        (service_code, service_name, service_description, service_type, icon_name, color_class, service_url) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [data.id, data.name, data.description || '', data.type, data.iconName, data.color, data.url]
+        (service_code, service_name, service_description, service_type, icon_name, color_class, service_url, url_type, other_information) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [data.id, data.name, data.description || '', data.type, data.iconName, data.color, data.url, data.urlType, data.otherInformation || null]
       );
     } else {
       // 更新记录
@@ -142,9 +146,11 @@ export async function POST(request: Request) {
             service_description = ?, 
             icon_name = ?, 
             color_class = ?, 
-            service_url = ? 
+            service_url = ?, 
+            url_type = ?, 
+            other_information = ? 
         WHERE service_code = ?`,
-        [data.name, data.description || '', data.iconName, data.color, data.url, data.id]
+        [data.name, data.description || '', data.iconName, data.color, data.url, data.urlType, data.otherInformation || null, data.id]
       );
     }
     

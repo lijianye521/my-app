@@ -156,7 +156,7 @@ import {
   GripVertical,
 } from "lucide-react";
 
-import { IconOption, ColorOption, MenuItem } from "./types";
+import { IconOption, ColorOption, MenuItem, UrlTypeOption } from "./types";
 
 // 头像图标选项
 export const iconOptions: IconOption[] = [
@@ -335,6 +335,20 @@ export const colorOptions: ColorOption[] = [
   { value: "bg-gray-500", label: "灰色", color: "#6b7280" },
   { value: "bg-zinc-500", label: "锌色", color: "#71717a" },
   { value: "bg-neutral-500", label: "中性", color: "#737373" },
+];
+
+// URL类型选项
+export const urlTypeOptions: UrlTypeOption[] = [
+  { 
+    value: "internal", 
+    label: "内网链接", 
+    description: "内网地址，在浏览器中打开" 
+  },
+  { 
+    value: "terminal", 
+    label: "终端命令", 
+    description: "使用windlocal协议执行的终端命令" 
+  },
 ];
 
 // 菜单项配置

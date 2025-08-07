@@ -46,10 +46,17 @@ const getIconByName = (iconName: string) => {
   return iconOption ? iconOption.icon : iconOptions[0].icon;
 };
 
-// Wind终端专用的页面启动函数
-function launch(params: string) {
-  console.log("launch", params);
-  window.location.href = "windlocal://open?" + encodeURIComponent(params);
+// 访问平台的函数 - 根据URL类型选择打开方式
+function openPlatform(url: string, urlType?: string) {
+  console.log("openPlatform", { url, urlType });
+  
+  if (urlType === 'internal') {
+    // 内网链接 - 在新标签页中打开
+    window.open(url, '_blank');
+  } else {
+    // 终端命令或默认情况 - 使用windlocal协议
+    window.location.href = "windlocal://open?" + encodeURIComponent(url);
+  }
 }
 
 // 平台卡片组件 - 用于拖拽覆盖层
@@ -178,7 +185,7 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
           <Button
             className="w-full bg-transparent"
             variant="outline"
-            onClick={() => launch(platform.url)}
+            onClick={() => openPlatform(platform.url, platform.urlType)}
             disabled={isSorting}
           >
             <ExternalLink className="h-4 w-4 mr-2" />
@@ -410,7 +417,7 @@ export default function Platforms({
                     <Button
                       className="w-full bg-transparent"
                       variant="outline"
-                      onClick={() => launch(platform.url)}
+                      onClick={() => openPlatform(platform.url, platform.urlType)}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       访问平台

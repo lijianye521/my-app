@@ -14,6 +14,16 @@ export interface ColorOption {
   color: string;
 }
 
+// URL类型枚举
+export type UrlType = 'internal' | 'terminal';
+
+// URL类型选项接口
+export interface UrlTypeOption {
+  value: UrlType;
+  label: string;
+  description: string;
+}
+
 // 平台项目接口
 export interface PlatformItem {
   id: string;
@@ -23,6 +33,8 @@ export interface PlatformItem {
   status: string;
   url: string;
   color: string;
+  urlType?: UrlType;
+  otherInformation?: string;
 }
 
 // 服务项目接口
@@ -33,6 +45,8 @@ export interface ServiceItem {
   iconName: string;
   url: string;
   color?: string;
+  urlType?: UrlType;
+  otherInformation?: string;
 }
 
 // 表单数据类型
@@ -42,6 +56,8 @@ export interface FormDataType {
   url: string;
   icon: string;
   color: string;
+  urlType: UrlType;
+  otherInformation?: string;
 }
 
 // 菜单项接口

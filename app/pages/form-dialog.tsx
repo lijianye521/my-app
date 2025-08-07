@@ -12,8 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Settings } from "lucide-react";
-import { FormDataType, PlatformItem, ServiceItem } from "./types";
-import { iconOptions, colorOptions } from "./data";
+import { FormDataType, PlatformItem, ServiceItem, UrlType } from "./types";
+import { iconOptions, colorOptions, urlTypeOptions } from "./data";
 
 interface FormDialogProps {
   isOpen: boolean;
@@ -36,6 +36,8 @@ export default function FormDialog({
     url: editingItem?.url || "",
     icon: editingItem?.iconName || "Settings",  // 修正这里，使用iconName
     color: editingItem?.color || "bg-blue-500",
+    urlType: (editingItem?.urlType as UrlType) || "internal",
+    otherInformation: editingItem?.otherInformation || "",
   });
 
   // 添加useEffect，当editingItem变化时重新设置表单数据
@@ -47,6 +49,8 @@ export default function FormDialog({
         url: editingItem.url || "",
         icon: editingItem.iconName || "Settings",  // 修正这里，使用iconName
         color: editingItem.color || "bg-blue-500",
+        urlType: (editingItem.urlType as UrlType) || "internal",
+        otherInformation: editingItem.otherInformation || "",
       });
     } else {
       // 当创建新项目时重置表单
@@ -61,6 +65,8 @@ export default function FormDialog({
       url: "",
       icon: "Settings",
       color: "bg-blue-500",
+      urlType: "internal",
+      otherInformation: "",
     });
   };
 
@@ -163,14 +169,57 @@ export default function FormDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="url">链接地址 *</Label>
+            <Label htmlFor="urlType">链接类型 *</Label>
+            <select
+              id="urlType"
+              value={formData.urlType}
+              onChange={(e) =>
+                setFormData({ ...formData, urlType: e.target.value as UrlType })
+              }
+              className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+              }}
+            >
+              {urlTypeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label} - {option.description}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="url">
+              {formData.urlType === 'internal' ? '链接地址' : '终端命令'} *
+            </Label>
             <Input
               id="url"
               value={formData.url}
               onChange={(e) =>
                 setFormData({ ...formData, url: e.target.value })
               }
-              placeholder="请输入链接地址，如：https://example.com"
+              placeholder={
+                formData.urlType === 'internal'
+                  ? "请输入内网链接地址，如：http://10.106.19.29:8090/"
+                  : "请输入windlocal命令，如：windlocal://open?cmd=notepad"
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="otherInformation">其他信息</Label>
+            <Textarea
+              id="otherInformation"
+              value={formData.otherInformation}
+              onChange={(e) =>
+                setFormData({ ...formData, otherInformation: e.target.value })
+              }
+              placeholder="请输入其他信息（可选，JSON格式）"
+              rows={2}
             />
           </div>
 

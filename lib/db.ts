@@ -2,6 +2,7 @@ import mysql from 'mysql2/promise';
 import fs from 'fs/promises';
 import path from 'path';
 import { config } from 'dotenv';
+import { MigrationService } from './migration-service';
 
 // Load environment variables from .env if present
 config();
@@ -84,11 +85,15 @@ export async function initializeDatabase() {
         console.log(`创建数据库(如不存在): ${dbConfig.database}`);
         await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\``);
         await connection.query(`USE \`${dbConfig.database}\``);
+        
+        // 首次初始化数据库表结构
         const initSqlPath = path.join(process.cwd(), 'database', 'init.sql');
         const sql = await fs.readFile(initSqlPath, 'utf8');
-        console.log('初始化数据库表结构...');
+        console.log('初始化基础数据库表结构...');
         await connection.query(sql);
-        console.log('数据库初始化完成');
+        console.log('基础数据库表结构初始化完成');
+        
+        
         return; // 成功后直接返回
       } finally {
         connection.release();
@@ -209,3 +214,6 @@ export async function updatePlatformServiceOrder(items: {id: string, sortOrder: 
     return { success: false, error };
   }
 }
+
+// 导出迁移服务
+export { MigrationService };

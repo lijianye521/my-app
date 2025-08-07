@@ -17,6 +17,19 @@ const getIconByName = (iconName: string) => {
   return iconOption ? iconOption.icon : iconOptions[0].icon;
 };
 
+// 访问平台/服务的函数 - 根据URL类型选择打开方式
+function openItem(url: string, urlType?: string) {
+  console.log("openItem", { url, urlType });
+  
+  if (urlType === 'internal') {
+    // 内网链接 - 在新标签页中打开
+    window.open(url, '_blank');
+  } else {
+    // 终端命令或默认情况 - 使用windlocal协议
+    window.location.href = "windlocal://open?" + encodeURIComponent(url);
+  }
+}
+
 export default function Dashboard({
   managementPlatforms,
   techServices,
@@ -110,7 +123,7 @@ export default function Dashboard({
                 <div
                   key={platform.id}
                   className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer group"
-                  onClick={() => window.location.href = "windlocal://open?" + encodeURIComponent(platform.url)}
+                  onClick={() => openItem(platform.url, platform.urlType)}
                 >
                   <div
                     className={`w-10 h-10 ${platform.color} rounded-lg flex items-center justify-center`}
@@ -146,7 +159,7 @@ export default function Dashboard({
                 <div
                   key={service.id}
                   className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer group"
-                  onClick={() => window.location.href = "windlocal://open?" + encodeURIComponent(service.url)}
+                  onClick={() => openItem(service.url, service.urlType)}
                 >
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                     <Icon className="h-5 w-5 text-white" />

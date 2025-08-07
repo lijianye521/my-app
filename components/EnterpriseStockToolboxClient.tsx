@@ -115,6 +115,8 @@ export default function EnterpriseStockToolboxClient({
         iconName: formData.icon,
         url: formData.url,
         color: formData.color,
+        urlType: formData.urlType,
+        otherInformation: formData.otherInformation,
         type: newItemType,
         isNew
       };
@@ -139,6 +141,8 @@ export default function EnterpriseStockToolboxClient({
           iconName: formData.icon,
           url: formData.url,
           color: formData.color,
+          urlType: formData.urlType,
+          otherInformation: formData.otherInformation,
           status: "运行中",
         };
 
@@ -216,7 +220,12 @@ export default function EnterpriseStockToolboxClient({
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ 
+              background: '#2563eb', /* 兜底纯色 */
+              filter: 'progid:DXImageTransform.Microsoft.gradient(startColorstr="#2563eb", endColorstr="#9333ea", GradientType=1)', /* IE9 */
+              backgroundImage: '-webkit-gradient(linear, left top, right top, from(#2563eb), to(#9333ea))', /* 老webkit */
+            
+            }}>
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
             <div>
