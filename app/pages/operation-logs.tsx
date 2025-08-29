@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Eye, RefreshCw, Filter } from 'lucide-react';
+// @ts-ignore - 忽略类型检查以解决react-virtualized导入问题
+import { List, AutoSizer } from 'react-virtualized';
 
 interface OperationLog {
   id: number;
@@ -31,13 +33,7 @@ interface OperationLogsProps {
 }
 
 export default function OperationLogs({ onBack }: OperationLogsProps) {
-  const [logsData, setLogsData] = useState<LogsData>({
-    total: 0,
-    logs: [],
-    page: 1,
-    pageSize: 50,
-    totalPages: 0
-  });
+  const [allLogs, setAllLogs] = useState<OperationLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     operationType: '',
@@ -45,22 +41,20 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
     startDate: '',
     endDate: ''
   });
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  // 日志项的估计高度
+  const estimatedRowHeight = 120; // 根据内容调整
 
-  // 获取操作日志
-  const fetchLogs = async (page: number = 1) => {
-    console.log('开始获取操作日志，页码:', page);
+  // 获取所有操作日志
+  const fetchLogs = async () => {
+    console.log('开始获取所有操作日志');
     setLoading(true);
     try {
+      // 获取所有日志，不分页
       const params = new URLSearchParams({
-        limit: '50',
-        offset: ((page - 1) * 50).toString()
+        limit: '1000', // 设置一个较大的限制，以获取更多数据
+        offset: '0'
       });
-
-      if (filters.operationType) params.append('operationType', filters.operationType);
-      if (filters.serviceCode) params.append('serviceCode', filters.serviceCode);
-      if (filters.startDate) params.append('startDate', filters.startDate);
-      if (filters.endDate) params.append('endDate', filters.endDate);
 
       console.log('请求URL:', `/api/operation-logs?${params}`);
       const response = await fetch(`/api/operation-logs?${params}`);
@@ -69,9 +63,8 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
       console.log('响应数据:', result);
 
       if (result.success) {
-        setLogsData(result.data);
-        setCurrentPage(page);
-        console.log('日志数据设置成功:', result.data);
+        setAllLogs(result.data.logs);
+        console.log('获取到所有日志数据:', result.data.logs.length);
       } else {
         console.error('获取日志失败:', result.message);
         alert('获取日志失败: ' + result.message);
@@ -97,7 +90,8 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
 
       if (result.success) {
         alert(`清理成功！删除了 ${result.deletedCount} 条过期日志`);
-        fetchLogs(currentPage); // 刷新当前页
+        // 重新获取所有日志
+        fetchLogs();
       } else {
         alert(`清理失败: ${result.message}`);
       }
@@ -159,17 +153,92 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
     }
   };
 
+  // 根据筛选条件过滤日志
+  const filteredLogs = useMemo(() => {
+    return allLogs.filter(log => {
+      // 操作类型过滤
+      if (filters.operationType && log.operation_type !== filters.operationType) {
+        return false;
+      }
+      
+      // 服务代码过滤
+      if (filters.serviceCode && !log.service_code.includes(filters.serviceCode)) {
+        return false;
+      }
+      
+      // 日期过滤
+      const logDate = new Date(log.created_at);
+      
+      // 开始日期过滤
+      if (filters.startDate) {
+        const startDate = new Date(filters.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        if (logDate < startDate) {
+          return false;
+        }
+      }
+      
+      // 结束日期过滤
+      if (filters.endDate) {
+        const endDate = new Date(filters.endDate);
+        endDate.setHours(23, 59, 59, 999); // 设置为当天结束时间
+        if (logDate > endDate) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }, [allLogs, filters]);
+  
+  // 渲染日志项的函数
+  const renderLogItem = ({ index, key, style }: any) => {
+    const log = filteredLogs[index];
+    const operationInfo = getOperationTypeInfo(log.operation_type);
+    
+    return (
+      <div 
+        key={key}
+        style={style} 
+        className="border rounded-lg p-4 hover:bg-gray-50 mb-2 mx-1"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2">
+            <Badge className={`${operationInfo.color} text-white`}>
+              {operationInfo.text}
+            </Badge>
+            <span className="font-medium">{log.service_code}</span>
+            <span className="text-gray-500">
+              by {log.nickname || log.username}
+            </span>
+          </div>
+          <span className="text-sm text-gray-500">
+            {new Date(log.created_at).toLocaleString('zh-CN')}
+          </span>
+        </div>
+        <div className="text-sm text-gray-700 mb-2">
+          {formatOperationDetail(log.operation_detail)}
+        </div>
+        <div className="text-xs text-gray-500">
+          IP: {log.ip_address} | {log.user_agent}
+        </div>
+      </div>
+    );
+  };
+  
   useEffect(() => {
     console.log('OperationLogs component mounted');
     fetchLogs();
   }, []);
+  
+  // 不再需要清除缓存，因为我们使用固定高度
 
   return (
     <div className="space-y-6">
       {/* 调试信息 */}
       <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
         <p><strong>调试信息:</strong> 操作日志页面已加载</p>
-        <p>当前日志数量: {logsData.logs.length} | 总数: {logsData.total} | 加载状态: {loading ? '加载中' : '已完成'}</p>
+        <p>总日志数量: {allLogs.length} | 过滤后数量: {filteredLogs.length} | 加载状态: {loading ? '加载中' : '已完成'}</p>
       </div>
 
       {/* 页面头部 */}
@@ -183,7 +252,7 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
         </div>
         <div className="flex gap-2">
           <Button 
-            onClick={() => fetchLogs(currentPage)} 
+            onClick={() => fetchLogs()} 
             variant="outline" 
             disabled={loading}
           >
@@ -255,14 +324,17 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
             </div>
           </div>
           <div className="mt-4">
-            <Button onClick={() => fetchLogs(1)} disabled={loading}>
-              应用筛选
-            </Button>
-            <Button 
-              onClick={() => {
-                setFilters({ operationType: '', serviceCode: '', startDate: '', endDate: '' });
-                fetchLogs(1);
-              }} 
+            <Button             onClick={() => {
+              // 只触发过滤条件更新，不需要重新请求
+              console.log("应用本地筛选");
+            }} 
+            disabled={loading}>
+            应用筛选
+          </Button>
+          <Button 
+            onClick={() => {
+              setFilters({ operationType: '', serviceCode: '', startDate: '', endDate: '' });
+            }}  
               variant="outline" 
               className="ml-2"
             >
@@ -273,29 +345,23 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
       </Card>
 
       {/* 统计信息 */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-6">
-            <div className="text-2xl font-bold">{logsData.total}</div>
+            <div className="text-2xl font-bold">{allLogs.length}</div>
             <p className="text-gray-600">总记录数</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-2xl font-bold">{logsData.totalPages}</div>
-            <p className="text-gray-600">总页数</p>
+            <div className="text-2xl font-bold">{filteredLogs.length}</div>
+            <p className="text-gray-600">筛选后记录数</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-2xl font-bold">{currentPage}</div>
-            <p className="text-gray-600">当前页</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{logsData.logs.length}</div>
-            <p className="text-gray-600">当前页记录</p>
+            <div className="text-2xl font-bold">{loading ? "加载中..." : "已完成"}</div>
+            <p className="text-gray-600">加载状态</p>
           </CardContent>
         </Card>
       </div>
@@ -311,64 +377,24 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
               <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
               <p>加载中...</p>
             </div>
-          ) : logsData.logs.length === 0 ? (
+          ) : filteredLogs.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               暂无操作记录
             </div>
           ) : (
-            <div className="space-y-4">
-              {logsData.logs.map((log) => {
-                const operationInfo = getOperationTypeInfo(log.operation_type);
-                return (
-                  <div key={log.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <Badge className={`${operationInfo.color} text-white`}>
-                          {operationInfo.text}
-                        </Badge>
-                        <span className="font-medium">{log.service_code}</span>
-                        <span className="text-gray-500">
-                          by {log.nickname || log.username}
-                        </span>
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {new Date(log.created_at).toLocaleString('zh-CN')}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-700 mb-2">
-                      {formatOperationDetail(log.operation_detail)}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      IP: {log.ip_address} | {log.user_agent}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* 分页 */}
-          {logsData.totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-center space-x-2">
-              <Button
-                onClick={() => fetchLogs(currentPage - 1)}
-                disabled={currentPage === 1 || loading}
-                variant="outline"
-                size="sm"
-              >
-                上一页
-              </Button>
-              <span className="px-4 py-2 text-sm">
-                第 {currentPage} 页，共 {logsData.totalPages} 页
-              </span>
-              <Button
-                onClick={() => fetchLogs(currentPage + 1)}
-                disabled={currentPage === logsData.totalPages || loading}
-                variant="outline"
-                size="sm"
-              >
-                下一页
-              </Button>
+            <div style={{ height: "600px", width: "100%" }}>
+              <AutoSizer>
+                {({ height, width }: { height: number; width: number }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowCount={filteredLogs.length}
+                    rowHeight={estimatedRowHeight}
+                    rowRenderer={renderLogItem}
+                    overscanRowCount={10}
+                  />
+                )}
+              </AutoSizer>
             </div>
           )}
         </CardContent>

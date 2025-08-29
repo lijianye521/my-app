@@ -174,13 +174,13 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-center text-sm">
-            没有账号？{" "}
-            <Link 
+            没有账号？{" "}请向系统管理员李建业申请账号
+            {/* <Link 
               href="/register" 
               className="text-blue-500 hover:underline"
             >
               立即注册
-            </Link>
+            </Link> */}
           </p>
         </CardFooter>
       </Card>

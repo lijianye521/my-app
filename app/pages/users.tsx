@@ -2,14 +2,19 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, UserCog, AlertCircle, CheckCircle2, Plus, Key, UserPlus } from "lucide-react";
+import { 
+  Users, UserCog, AlertCircle, CheckCircle2, Plus, Key, UserPlus, 
+  Trash2, AlertTriangle, CheckSquare, Square, X 
+} from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { UserItem } from "./types";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import RegisterForm from "@/components/RegisterForm";
 
 export default function UsersManagement() {
   const [users, setUsers] = useState<UserItem[]>([]);
@@ -17,23 +22,17 @@ export default function UsersManagement() {
   const { data: session } = useSession();
   const router = useRouter();
   
+  // 多选相关状态
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  
   // 修改密码相关状态
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserItem | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
-  
-  // 添加用户相关状态
-  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
-  const [newUser, setNewUser] = useState({
-    username: "",
-    password: "",
-    confirmPassword: "",
-    nickname: "",
-    email: ""
-  });
-  const [isAddUserLoading, setIsAddUserLoading] = useState(false);
 
   // 使用ref来跟踪是否已经发送请求，避免重复请求
   const hasInitialFetchedRef = useRef(false);
@@ -105,10 +104,132 @@ export default function UsersManagement() {
   
   // 打开修改密码对话框
   const openPasswordDialog = (user: UserItem) => {
+    // 检查是否有多个用户被选中
+    if (selectedUserIds.length > 1) {
+      toast.error("修改密码时只能选择一个用户，请取消多选后重试");
+      return;
+    }
+    
     setSelectedUser(user);
     setNewPassword("");
     setConfirmPassword("");
     setIsPasswordDialogOpen(true);
+  };
+  
+  // 处理复选框变更
+  const handleCheckboxChange = (userId: string) => {
+    setSelectedUserIds(prev => {
+      if (prev.includes(userId)) {
+        // 如果已经选中，则取消选中
+        const newSelected = prev.filter(id => id !== userId);
+        setSelectAll(false);
+        return newSelected;
+      } else {
+        // 否则添加到选中列表
+        const newSelected = [...prev, userId];
+        // 如果全部选中，则将selectAll设为true
+        if (newSelected.length === users.length) {
+          setSelectAll(true);
+        }
+        return newSelected;
+      }
+    });
+  };
+
+  // 处理全选/取消全选
+  const handleSelectAll = () => {
+    if (selectAll) {
+      // 如果当前是全选状态，则取消全选
+      setSelectedUserIds([]);
+      setSelectAll(false);
+    } else {
+      // 否则全选
+      setSelectedUserIds(users.map(user => user.id));
+      setSelectAll(true);
+    }
+  };
+
+  // 批量删除选中的用户
+  const handleBatchDelete = async () => {
+    if (selectedUserIds.length === 0) {
+      toast.error("请先选择要删除的用户");
+      return;
+    }
+
+    try {
+      // 创建一个结果跟踪对象
+      const results = {
+        total: selectedUserIds.length,
+        success: 0,
+        failed: 0,
+        errors: [] as string[]
+      };
+      
+      // 逐个删除用户，而不是使用Promise.all
+      // 这样即使某些请求失败，其他请求仍然可以继续
+      for (const userId of selectedUserIds) {
+        try {
+          const response = await fetch(`/api/users/${userId}`, {
+            method: "DELETE"
+          });
+          
+          // 检查响应状态
+          if (!response.ok) {
+            const errorText = await response.text();
+            let errorMessage;
+            try {
+              // 尝试解析为JSON
+              const errorData = JSON.parse(errorText);
+              errorMessage = errorData.error || `删除失败(${response.status})`;
+            } catch {
+              // 如果无法解析为JSON，使用状态码
+              errorMessage = `删除失败(${response.status})`;
+            }
+            
+            console.error(`删除用户 ${userId} 失败:`, errorMessage);
+            results.failed++;
+            results.errors.push(`ID:${userId} - ${errorMessage}`);
+            continue;
+          }
+          
+          const data = await response.json();
+          if (data.success) {
+            results.success++;
+          } else {
+            results.failed++;
+            results.errors.push(`ID:${userId} - ${data.error || '未知错误'}`);
+          }
+        } catch (err) {
+          console.error(`删除用户 ${userId} 时出错:`, err);
+          results.failed++;
+          results.errors.push(`ID:${userId} - 请求处理错误`);
+        }
+      }
+
+      // 展示结果
+      if (results.success > 0) {
+        toast.success(`成功删除 ${results.success} 个用户`);
+        
+        // 从用户列表中移除已删除的用户
+        const successIds = selectedUserIds.filter((_, index) => index < results.success);
+        setUsers(prev => prev.filter(user => !successIds.includes(user.id)));
+        
+        // 清空选中状态
+        setSelectedUserIds([]);
+        setSelectAll(false);
+      }
+      
+      // 如果有失败的，显示错误
+      if (results.failed > 0) {
+        console.error("删除失败详情:", results.errors);
+        toast.error(`${results.failed} 个用户删除失败，请查看控制台了解详情`);
+      }
+    } catch (error) {
+      console.error("批量删除用户失败:", error);
+      toast.error("删除用户时发生错误");
+    } finally {
+      setIsDeleteConfirmOpen(false);
+    }
   };
   
   // 处理密码修改提交
@@ -150,67 +271,7 @@ export default function UsersManagement() {
     }
   };
   
-  // 处理添加用户表单变更
-  const handleNewUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setNewUser(prev => ({ ...prev, [name]: value }));
-  };
-  
-  // 处理添加用户提交
-  const handleAddUser = async () => {
-    if (!newUser.username || !newUser.password || !newUser.confirmPassword) {
-      toast.error("请填写所有必填字段");
-      return;
-    }
-    
-    if (newUser.password !== newUser.confirmPassword) {
-      toast.error("两次输入的密码不一致");
-      return;
-    }
-    
-    try {
-      setIsAddUserLoading(true);
-      
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: newUser.username,
-          password: newUser.password,
-          nickname: newUser.nickname,
-          email: newUser.email,
-        }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || "添加用户失败");
-      }
-      
-      toast.success("用户添加成功");
-      setIsAddUserDialogOpen(false);
-      
-      // 重置表单
-      setNewUser({
-        username: "",
-        password: "",
-        confirmPassword: "",
-        nickname: "",
-        email: ""
-      });
-      
-      // 重新加载用户列表
-      hasInitialFetchedRef.current = false;
-      fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message || "添加用户时出错");
-    } finally {
-      setIsAddUserLoading(false);
-    }
-  };
+  // 不再需要单独的注册成功处理函数
 
   if (isLoading) {
     return (
@@ -245,9 +306,14 @@ export default function UsersManagement() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">用户管理</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-bold">用户管理</h2>
           <Badge variant="secondary">{users.length}个用户</Badge>
+          {selectedUserIds.length > 0 && (
+            <Badge variant="destructive">{selectedUserIds.length}个用户已选中</Badge>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
           <Button
             className="bg-green-600 hover:bg-green-700"
             onClick={() => {
@@ -260,13 +326,40 @@ export default function UsersManagement() {
             刷新数据
           </Button>
           
-          <Button
-            className="bg-blue-600 hover:bg-blue-700"
-            onClick={() => setIsAddUserDialogOpen(true)}
-          >
-            <UserPlus className="h-4 w-4 mr-2" />
-            添加用户
-          </Button>
+          {selectedUserIds.length > 0 && (
+            <Button
+              variant="destructive"
+              onClick={() => setIsDeleteConfirmOpen(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              批量删除 ({selectedUserIds.length})
+            </Button>
+          )}
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                <UserPlus className="h-4 w-4 mr-2" />
+                添加用户
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>添加新用户</DialogTitle>
+                <DialogDescription>
+                  创建一个新的用户账号
+                </DialogDescription>
+              </DialogHeader>
+              <RegisterForm 
+                onSuccess={() => {
+                  // 重新加载用户列表
+                  hasInitialFetchedRef.current = false;
+                  fetchUsers();
+                }} 
+                isDialog={true} 
+              />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -274,6 +367,15 @@ export default function UsersManagement() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
+              <th className="px-6 py-3 text-center">
+                <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selectAll}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="全选"
+                  />
+                </div>
+              </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 ID
               </th>
@@ -308,7 +410,20 @@ export default function UsersManagement() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
+              <tr 
+                key={user.id} 
+                className={`hover:bg-gray-50 ${selectedUserIds.includes(user.id) ? 'bg-blue-50' : ''}`}
+                onClick={() => handleCheckboxChange(user.id)}
+              >
+                <td className="px-6 py-4 whitespace-nowrap text-center" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-center">
+                    <Checkbox
+                      checked={selectedUserIds.includes(user.id)}
+                      onCheckedChange={() => handleCheckboxChange(user.id)}
+                      aria-label={`选择用户 ${user.username}`}
+                    />
+                  </div>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.id}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.username}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{user.password}</td>
@@ -403,98 +518,53 @@ export default function UsersManagement() {
         </DialogContent>
       </Dialog>
       
-      {/* 添加用户对话框 */}
-      <Dialog open={isAddUserDialogOpen} onOpenChange={setIsAddUserDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+      {/* 添加用户对话框组件已移至按钮旁 */}
+      
+      {/* 批量删除确认对话框 */}
+      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>添加新用户</DialogTitle>
+            <DialogTitle className="flex items-center text-red-600">
+              <AlertTriangle className="h-5 w-5 mr-2" />
+              确认删除
+            </DialogTitle>
             <DialogDescription>
-              创建一个新的用户账号
+              您确定要删除选中的 {selectedUserIds.length} 个用户吗？此操作不可恢复。
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">
-                用户名 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="username"
-                name="username"
-                placeholder="请输入用户名"
-                value={newUser.username}
-                onChange={handleNewUserChange}
-                required
-              />
+          <div className="py-4">
+            <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-800 text-sm mb-4">
+              <p>警告：删除用户将同时删除与其相关的所有数据！</p>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="nickname">昵称</Label>
-              <Input
-                id="nickname"
-                name="nickname"
-                placeholder="请输入昵称"
-                value={newUser.nickname}
-                onChange={handleNewUserChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">邮箱</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="请输入邮箱"
-                value={newUser.email}
-                onChange={handleNewUserChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">
-                密码 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="请输入密码"
-                value={newUser.password}
-                onChange={handleNewUserChange}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">
-                确认密码 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="请再次输入密码"
-                value={newUser.confirmPassword}
-                onChange={handleNewUserChange}
-                required
-              />
-            </div>
+            <ul className="max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50">
+              {users
+                .filter(user => selectedUserIds.includes(user.id))
+                .map(user => (
+                  <li key={user.id} className="py-1 flex items-center">
+                    <CheckSquare className="h-4 w-4 text-blue-500 mr-2" />
+                    <span className="font-medium">{user.username}</span>
+                    {user.nickname && <span className="text-gray-500 ml-2">({user.nickname})</span>}
+                    {user.role === 'admin' && <Badge className="ml-2 bg-red-500">管理员</Badge>}
+                  </li>
+                ))}
+            </ul>
           </div>
           
           <DialogFooter>
             <Button 
               variant="outline" 
-              onClick={() => setIsAddUserDialogOpen(false)}
-              disabled={isAddUserLoading}
+              onClick={() => setIsDeleteConfirmOpen(false)}
             >
               取消
             </Button>
             <Button 
-              onClick={handleAddUser}
-              disabled={isAddUserLoading}
+              variant="destructive"
+              onClick={handleBatchDelete}
             >
-              {isAddUserLoading ? "添加中..." : "添加用户"}
+              <Trash2 className="h-4 w-4 mr-2" />
+              确认删除
             </Button>
           </DialogFooter>
         </DialogContent>
