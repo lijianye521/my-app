@@ -340,6 +340,11 @@ export const colorOptions: ColorOption[] = [
 // URL类型选项
 export const urlTypeOptions: UrlTypeOption[] = [
   { 
+    value: "internal_terminal", 
+    label: "终端内跳转", 
+    description: "使用当前域名拼接URL并在浏览器中打开" 
+  },
+  { 
     value: "internal", 
     label: "内网链接", 
     description: "内网地址，在浏览器中打开" 
@@ -359,4 +364,6 @@ export const menuItems: MenuItem[] = [
   { id: "users", label: "用户管理", icon: UserCheck },
   { id: "docs", label: "帮助中心", icon: BookOpen },
   { id: "operation-logs", label: "操作日志", icon: FileText },
+  { id: "ai-agent", label: "Agent", icon: Sparkles },
+  { id: "coming-soon", label: "敬请期待", icon: Clock },
 ];

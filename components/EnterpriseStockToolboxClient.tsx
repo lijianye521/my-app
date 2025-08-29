@@ -20,6 +20,8 @@ import UsersManagement from "@/app/pages/users";
 import Docs from "@/app/pages/docs";
 import OperationLogs from "@/app/pages/operation-logs";
 import FormDialog from "@/app/pages/form-dialog";
+import AIAgent from "@/app/pages/ai-agent";
+import ComingSoon from "@/app/pages/coming-soon";
 
 import { PlatformItem, ServiceItem, FormDataType } from "@/app/pages/types";
 import { menuItems, iconOptions } from "@/app/pages/data";
@@ -203,6 +205,10 @@ export default function EnterpriseStockToolboxClient({
         return <Docs />;
       case "operation-logs":
         return <OperationLogs onBack={() => setActiveSection("dashboard")} />;
+      case "ai-agent":
+        return <AIAgent />;
+      case "coming-soon":
+        return <ComingSoon />;
       default:
         return <Dashboard {...commonProps} />;
     }

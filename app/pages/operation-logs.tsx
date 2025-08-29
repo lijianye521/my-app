@@ -236,10 +236,10 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
   return (
     <div className="space-y-6">
       {/* 调试信息 */}
-      <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+      {/* <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
         <p><strong>调试信息:</strong> 操作日志页面已加载</p>
         <p>总日志数量: {allLogs.length} | 过滤后数量: {filteredLogs.length} | 加载状态: {loading ? '加载中' : '已完成'}</p>
-      </div>
+      </div> */}
 
       {/* 页面头部 */}
       <div className="flex items-center justify-between">

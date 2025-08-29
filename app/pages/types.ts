@@ -28,7 +28,7 @@ export interface UserItem {
 }
 
 // URL类型枚举
-export type UrlType = 'internal' | 'terminal';
+export type UrlType = 'internal' | 'terminal' | 'internal_terminal';
 
 // URL类型选项接口
 export interface UrlTypeOption {
