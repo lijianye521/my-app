@@ -16,6 +16,7 @@ import { useSession, signOut } from "next-auth/react";
 import Dashboard from "@/app/pages/dashboard";
 import Platforms from "@/app/pages/platforms";
 import Services from "@/app/pages/services";
+import UsersManagement from "@/app/pages/users";
 import Docs from "@/app/pages/docs";
 import OperationLogs from "@/app/pages/operation-logs";
 import FormDialog from "@/app/pages/form-dialog";
@@ -196,6 +197,8 @@ export default function EnterpriseStockToolboxClient({
         return <Platforms {...commonProps} />;
       case "services":
         return <Services {...commonProps} />;
+      case "users":
+        return <UsersManagement />;
       case "docs":
         return <Docs />;
       case "operation-logs":
@@ -207,6 +210,17 @@ export default function EnterpriseStockToolboxClient({
 
   // 获取会话信息
   const { data: session } = useSession();
+  console.log('session', session);
+  
+  // 根据用户角色过滤显示的菜单项
+  const filteredMenuItems = menuItems.filter(item => {
+    // 仅管理员可见的菜单项
+    if (item.id === "users") {
+      return session?.user?.role === "admin";
+    }
+    // 其他菜单项所有人可见
+    return true;
+  });
   
   // 处理退出登录
   const handleLogout = async () => {
@@ -237,7 +251,7 @@ export default function EnterpriseStockToolboxClient({
 
         <nav className="flex-1 p-4">
           <div className="space-y-2">
-            {menuItems.map((item) => {
+            {filteredMenuItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Button
@@ -278,6 +292,17 @@ export default function EnterpriseStockToolboxClient({
                     <div className="text-sm text-gray-500">{session?.user?.email || ""}</div>
                     {session?.user?.id && (
                       <div className="text-sm text-gray-500">ID: {session.user.id}</div>
+                    )}
+                    {session?.user?.role && (
+                      <div className="text-sm mt-1">
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          session.user.role === 'admin' 
+                            ? 'bg-red-100 text-red-800' 
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {session.user.role === 'admin' ? '管理员' : '普通用户'}
+                        </span>
+                      </div>
                     )}
                   </div>
                   <DropdownMenuSeparator />

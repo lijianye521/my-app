@@ -14,6 +14,19 @@ export interface ColorOption {
   color: string;
 }
 
+// 用户接口
+export interface UserItem {
+  id: string;
+  username: string;
+  password: string;
+  nickname: string;
+  email: string;
+  role: 'admin' | 'user';
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // URL类型枚举
 export type UrlType = 'internal' | 'terminal';
 
