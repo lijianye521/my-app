@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { OperationLogService } from "@/lib/operation-log-service";
 
 export async function GET() {
   try {
@@ -130,6 +131,27 @@ export async function POST(request: Request) {
     
     const db = await getDb();
     
+    // 获取用户ID (假设session.user有id字段，否则需要查询数据库)
+    let userId;
+    if (session.user?.email) {
+      const [userRows] = await db.query(
+        "SELECT id FROM users WHERE email = ? OR username = ?",
+        [session.user.email, session.user.email]
+      );
+      userId = (userRows as any[])[0]?.id;
+    }
+
+    // 记录操作详情
+    const operationDetail: any = {
+      serviceCode: data.id,
+      serviceName: data.name,
+      serviceType: data.type,
+      url: data.url,
+      iconName: data.iconName,
+      color: data.color,
+      urlType: data.urlType
+    };
+
     if (data.isNew) {
       // 新增记录
       await db.query(
@@ -138,7 +160,26 @@ export async function POST(request: Request) {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [data.id, data.name, data.description || '', data.type, data.iconName, data.color, data.url, data.urlType, data.otherInformation || null]
       );
+
+      // 记录新增操作日志
+      if (userId) {
+        await OperationLogService.logOperation({
+          userId,
+          operationType: 'add',
+          serviceCode: data.id,
+          operationDetail,
+          ipAddress: OperationLogService.getClientIP(request),
+          userAgent: OperationLogService.getUserAgent(request)
+        });
+      }
     } else {
+      // 查询更新前的数据
+      const [oldDataRows] = await db.query(
+        "SELECT * FROM platform_services WHERE service_code = ?",
+        [data.id]
+      );
+      const oldData = (oldDataRows as any[])[0];
+
       // 更新记录
       await db.query(
         `UPDATE platform_services 
@@ -152,6 +193,27 @@ export async function POST(request: Request) {
         WHERE service_code = ?`,
         [data.name, data.description || '', data.iconName, data.color, data.url, data.urlType, data.otherInformation || null, data.id]
       );
+
+      // 记录更新操作日志，包含变更内容
+      if (userId && oldData) {
+        const changes: any = {};
+        if (oldData.service_name !== data.name) changes.name = { old: oldData.service_name, new: data.name };
+        if (oldData.service_description !== (data.description || '')) changes.description = { old: oldData.service_description, new: data.description || '' };
+        if (oldData.icon_name !== data.iconName) changes.iconName = { old: oldData.icon_name, new: data.iconName };
+        if (oldData.color_class !== data.color) changes.color = { old: oldData.color_class, new: data.color };
+        if (oldData.service_url !== data.url) changes.url = { old: oldData.service_url, new: data.url };
+        if (oldData.url_type !== data.urlType) changes.urlType = { old: oldData.url_type, new: data.urlType };
+        if (oldData.other_information !== (data.otherInformation || null)) changes.otherInformation = { old: oldData.other_information, new: data.otherInformation || null };
+
+        await OperationLogService.logOperation({
+          userId,
+          operationType: 'update',
+          serviceCode: data.id,
+          operationDetail: { ...operationDetail, changes },
+          ipAddress: OperationLogService.getClientIP(request),
+          userAgent: OperationLogService.getUserAgent(request)
+        });
+      }
     }
     
     return NextResponse.json({ success: true });
@@ -189,12 +251,53 @@ export async function DELETE(request: Request) {
     
     // 调用删除函数
     const db = await getDb();
+
+    // 获取用户ID
+    let userId;
+    if (session.user?.email) {
+      const [userRows] = await db.query(
+        "SELECT id FROM users WHERE email = ? OR username = ?",
+        [session.user.email, session.user.email]
+      );
+      userId = (userRows as any[])[0]?.id;
+    }
+
+    // 查询要删除的记录详情，用于日志记录
+    const [deleteDataRows] = await db.query(
+      "SELECT * FROM platform_services WHERE service_code = ?",
+      [id]
+    );
+    const deleteData = (deleteDataRows as any[])[0];
     
     // 删除记录
     await db.query(
       "DELETE FROM platform_services WHERE service_code = ?",
       [id]
     );
+
+    // 记录删除操作日志
+    if (userId && deleteData) {
+      await OperationLogService.logOperation({
+        userId,
+        operationType: 'delete',
+        serviceCode: id,
+        operationDetail: {
+          deletedData: {
+            serviceCode: deleteData.service_code,
+            serviceName: deleteData.service_name,
+            serviceType: deleteData.service_type,
+            url: deleteData.service_url,
+            iconName: deleteData.icon_name,
+            color: deleteData.color_class,
+            urlType: deleteData.url_type,
+            description: deleteData.service_description,
+            otherInformation: deleteData.other_information
+          }
+        },
+        ipAddress: OperationLogService.getClientIP(request),
+        userAgent: OperationLogService.getUserAgent(request)
+      });
+    }
     
     return NextResponse.json({ success: true });
   } catch (error) {

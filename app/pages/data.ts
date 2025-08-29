@@ -356,6 +356,6 @@ export const menuItems: MenuItem[] = [
   { id: "dashboard", label: "工作台", icon: Home },
   { id: "platforms", label: "管理平台", icon: Settings },
   { id: "services", label: "技术服务", icon: Database },
-  { id: "docs", label: "文档中心", icon: BookOpen },
-  { id: "monitoring", label: "系统监控", icon: BarChart3 },
+  { id: "docs", label: "帮助中心", icon: BookOpen },
+  { id: "operation-logs", label: "操作日志", icon: FileText },
 ];

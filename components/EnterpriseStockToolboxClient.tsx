@@ -17,7 +17,7 @@ import Dashboard from "@/app/pages/dashboard";
 import Platforms from "@/app/pages/platforms";
 import Services from "@/app/pages/services";
 import Docs from "@/app/pages/docs";
-import Monitoring from "@/app/pages/monitoring";
+import OperationLogs from "@/app/pages/operation-logs";
 import FormDialog from "@/app/pages/form-dialog";
 
 import { PlatformItem, ServiceItem, FormDataType } from "@/app/pages/types";
@@ -198,8 +198,8 @@ export default function EnterpriseStockToolboxClient({
         return <Services {...commonProps} />;
       case "docs":
         return <Docs />;
-      case "monitoring":
-        return <Monitoring />;
+      case "operation-logs":
+        return <OperationLogs onBack={() => setActiveSection("dashboard")} />;
       default:
         return <Dashboard {...commonProps} />;
     }

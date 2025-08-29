@@ -39,23 +39,23 @@ CREATE TABLE IF NOT EXISTS `platform_services` (
   KEY `idx_sort_order` (`sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='平台服务配置表';
 
--- Technical services and management platforms initial data
-INSERT INTO `platform_services` (`service_code`, `service_name`, `service_description`, `service_type`, `icon_name`, `color_class`, `service_url`, `sort_order`)
-VALUES
-('ainews', 'AINEWS运营管理', 'AI新闻内容管理和发布平台', 'platform', 'FileText', 'bg-blue-500', '/ainews-admin', 1),
-('indicators', '指标服务管理', '金融指标数据服务运营管理', 'platform', 'BarChart3', 'bg-green-500', '/indicators-admin', 2),
-('f9menu', 'F9菜单管理', 'F9快捷菜单配置和权限管理', 'platform', 'Settings', 'bg-purple-500', '/f9menu-admin', 3),
-('research', '券商研报权限', '定制券商研报访问权限管理', 'platform', 'Shield', 'bg-orange-500', '/research-admin', 4),
-('docparser', 'DocParser密钥管理', '文档解析服务API密钥管理', 'platform', 'Key', 'bg-red-500', '/docparser-admin', 5),
-('enti', 'ENTI管理员设置', '企业实体管理员权限配置', 'platform', 'Users', 'bg-indigo-500', '/enti-admin', 6),
-('email', '邮件订阅管理', '邮件订阅服务运营管理', 'platform', 'Mail', 'bg-pink-500', '/email-admin', 7),
-('prompt', 'Prompt管理平台', 'AI提示词模板管理和优化', 'platform', 'Code', 'bg-teal-500', '/prompt-admin', 8),
-('ocean', 'Ocean服务', '海量数据处理服务', 'service', 'Database', 'bg-blue-500', '/ocean', 1),
-('cloud', 'Cloud服务', '云计算资源管理', 'service', 'Cloud', 'bg-green-500', '/cloud', 2),
-('wss', 'WSS指标服务', 'WebSocket实时指标推送', 'service', 'Zap', 'bg-purple-500', '/wss', 3),
-('rag', 'RAG服务', '检索增强生成服务', 'service', 'Globe', 'bg-orange-500', '/rag', 4),
-('html2img', 'HTML转图工具', 'HTML页面转图片工具', 'service', 'FileText', 'bg-red-500', '/html2img', 5)
-ON DUPLICATE KEY UPDATE service_code=service_code;
+-- -- Technical services and management platforms initial data
+-- INSERT INTO `platform_services` (`service_code`, `service_name`, `service_description`, `service_type`, `icon_name`, `color_class`, `service_url`, `sort_order`)
+-- VALUES
+-- ('ainews', 'AINEWS运营管理', 'AI新闻内容管理和发布平台', 'platform', 'FileText', 'bg-blue-500', '/ainews-admin', 1),
+-- ('indicators', '指标服务管理', '金融指标数据服务运营管理', 'platform', 'BarChart3', 'bg-green-500', '/indicators-admin', 2),
+-- ('f9menu', 'F9菜单管理', 'F9快捷菜单配置和权限管理', 'platform', 'Settings', 'bg-purple-500', '/f9menu-admin', 3),
+-- ('research', '券商研报权限', '定制券商研报访问权限管理', 'platform', 'Shield', 'bg-orange-500', '/research-admin', 4),
+-- ('docparser', 'DocParser密钥管理', '文档解析服务API密钥管理', 'platform', 'Key', 'bg-red-500', '/docparser-admin', 5),
+-- ('enti', 'ENTI管理员设置', '企业实体管理员权限配置', 'platform', 'Users', 'bg-indigo-500', '/enti-admin', 6),
+-- ('email', '邮件订阅管理', '邮件订阅服务运营管理', 'platform', 'Mail', 'bg-pink-500', '/email-admin', 7),
+-- ('prompt', 'Prompt管理平台', 'AI提示词模板管理和优化', 'platform', 'Code', 'bg-teal-500', '/prompt-admin', 8),
+-- ('ocean', 'Ocean服务', '海量数据处理服务', 'service', 'Database', 'bg-blue-500', '/ocean', 1),
+-- ('cloud', 'Cloud服务', '云计算资源管理', 'service', 'Cloud', 'bg-green-500', '/cloud', 2),
+-- ('wss', 'WSS指标服务', 'WebSocket实时指标推送', 'service', 'Zap', 'bg-purple-500', '/wss', 3),
+-- ('rag', 'RAG服务', '检索增强生成服务', 'service', 'Globe', 'bg-orange-500', '/rag', 4),
+-- ('html2img', 'HTML转图工具', 'HTML页面转图片工具', 'service', 'FileText', 'bg-red-500', '/html2img', 5)
+-- ON DUPLICATE KEY UPDATE service_code=service_code;
 
 -- User operation logs table
 CREATE TABLE IF NOT EXISTS `user_operation_logs` (
