@@ -42,8 +42,8 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
     endDate: ''
   });
   
-  // 日志项的估计高度
-  const estimatedRowHeight = 120; // 根据内容调整
+  // 日志项的估计高度 - 增加高度以避免重叠
+  const estimatedRowHeight = 140; // 增加高度以容纳所有内容
 
   // 获取所有操作日志
   const fetchLogs = async () => {
@@ -199,28 +199,39 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
     return (
       <div 
         key={key}
-        style={style} 
-        className="border rounded-lg p-4 hover:bg-gray-50 mb-2 mx-1"
+        style={{
+          ...style,
+          height: estimatedRowHeight - 8, // 减去margin的高度
+          paddingBottom: '8px' // 添加底部间距
+        }} 
+        className="border rounded-lg p-4 hover:bg-gray-50 mx-2 mb-2 bg-white shadow-sm"
       >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Badge className={`${operationInfo.color} text-white`}>
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center space-x-2 flex-wrap">
+            <Badge className={`${operationInfo.color} text-white shrink-0`}>
               {operationInfo.text}
             </Badge>
-            <span className="font-medium">{log.service_code}</span>
-            <span className="text-gray-500">
+            <span className="font-medium text-sm">{log.service_code}</span>
+            <span className="text-gray-500 text-sm">
               by {log.nickname || log.username}
             </span>
           </div>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 shrink-0">
             {new Date(log.created_at).toLocaleString('zh-CN')}
           </span>
         </div>
-        <div className="text-sm text-gray-700 mb-2">
+        <div className="text-sm text-gray-700 mb-2 break-words" style={{ 
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          lineHeight: '1.4em',
+          maxHeight: '2.8em'
+        }}>
           {formatOperationDetail(log.operation_detail)}
         </div>
-        <div className="text-xs text-gray-500">
-          IP: {log.ip_address} | {log.user_agent}
+        <div className="text-xs text-gray-500 truncate">
+          IP: {log.ip_address} | {log.user_agent.length > 50 ? log.user_agent.substring(0, 50) + '...' : log.user_agent}
         </div>
       </div>
     );
@@ -382,7 +393,7 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
               暂无操作记录
             </div>
           ) : (
-            <div style={{ height: "600px", width: "100%" }}>
+            <div style={{ height: "600px", width: "100%" }} className="relative">
               <AutoSizer>
                 {({ height, width }: { height: number; width: number }) => (
                   <List
@@ -391,7 +402,11 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
                     rowCount={filteredLogs.length}
                     rowHeight={estimatedRowHeight}
                     rowRenderer={renderLogItem}
-                    overscanRowCount={10}
+                    overscanRowCount={5}
+                    style={{
+                      outline: 'none', // 移除focus轮廓
+                      backgroundColor: '#f9fafb' // 添加背景色
+                    }}
                   />
                 )}
               </AutoSizer>

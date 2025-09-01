@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TrendingUp, LogOut, User } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
+import AuthNotification from "@/components/AuthNotification";
 
 import Dashboard from "@/app/pages/dashboard";
 import Platforms from "@/app/pages/platforms";
@@ -44,6 +45,13 @@ export default function EnterpriseStockToolboxClient({
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<PlatformItem | ServiceItem | null>(null);
   const [newItemType, setNewItemType] = useState("platform");
+  
+  // 通知组件相关状态
+  const [notification, setNotification] = useState<{
+    title: string;
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   console.log('EnterpriseStockToolboxClient接收数据:', { initialPlatforms, initialServices });
 
@@ -95,13 +103,25 @@ export default function EnterpriseStockToolboxClient({
             setTechServices((prev) => prev.filter((item) => item.id !== id));
           }
           
-          alert("删除成功");
+          setNotification({
+            title: "删除成功",
+            message: "配置项已成功删除",
+            type: "success"
+          });
         } else {
-          alert(`删除失败: ${result.message}`);
+          setNotification({
+            title: "删除失败",
+            message: result.message || "删除操作失败，请重试",
+            type: "error"
+          });
         }
       } catch (error) {
         console.error("删除出错:", error);
-        alert("删除过程中发生错误，请查看控制台");
+        setNotification({
+          title: "删除错误",
+          message: "删除过程中发生错误，请检查网络连接",
+          type: "error"
+        });
       }
     }
   };
@@ -168,13 +188,25 @@ export default function EnterpriseStockToolboxClient({
           }
         }
         
-        alert(isNew ? "添加成功" : "更新成功");
+        setNotification({
+          title: isNew ? "添加成功" : "更新成功",
+          message: isNew ? "新配置项已成功添加" : "配置项已成功更新",
+          type: "success"
+        });
       } else {
-        alert(`保存失败: ${result.message}`);
+        setNotification({
+          title: "保存失败",
+          message: result.message || "保存操作失败，请重试",
+          type: "error"
+        });
       }
     } catch (error) {
       console.error("保存出错:", error);
-      alert("保存过程中发生错误，请查看控制台");
+      setNotification({
+        title: "保存错误",
+        message: "保存过程中发生错误，请检查网络连接",
+        type: "error"
+      });
     }
     
     // 关闭对话框
@@ -334,6 +366,16 @@ export default function EnterpriseStockToolboxClient({
         editingItem={editingItem}
         itemType={newItemType}
       />
+      
+      {/* 通知组件 */}
+      {notification && (
+        <AuthNotification
+          title={notification.title}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 }
