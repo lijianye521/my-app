@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Users, UserCog, AlertCircle, CheckCircle2, Plus, Key, UserPlus, 
-  Trash2, AlertTriangle, CheckSquare, Square, X 
+  Trash2, AlertTriangle, CheckSquare, Square, X, Upload, Shield, User 
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UserItem } from "./types";
@@ -33,6 +33,14 @@ export default function UsersManagement() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  
+  // Excel导入相关状态
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResults, setImportResults] = useState<any>(null);
+  const [isImportResultsOpen, setIsImportResultsOpen] = useState(false);
+  
+  // 批量角色设置相关状态
+  const [isBatchRoleLoading, setBatchRoleLoading] = useState(false);
 
   // 使用ref来跟踪是否已经发送请求，避免重复请求
   const hasInitialFetchedRef = useRef(false);
@@ -232,6 +240,108 @@ export default function UsersManagement() {
     }
   };
   
+  // 处理Excel文件导入
+  const handleExcelImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // 验证文件类型
+    const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
+      toast.error("只支持Excel文件格式(.xlsx或.xls)");
+      return;
+    }
+    
+    try {
+      setIsImporting(true);
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/users/import-excel', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || '导入失败');
+      }
+      
+      if (result.success) {
+        setImportResults(result.results);
+        setIsImportResultsOpen(true);
+        toast.success(result.message);
+        
+        // 刷新用户列表
+        hasInitialFetchedRef.current = false;
+        await fetchUsers();
+      } else {
+        toast.error(result.error || '导入失败');
+      }
+    } catch (error: any) {
+      console.error('Excel导入失败:', error);
+      toast.error(error.message || 'Excel导入过程中发生错误');
+    } finally {
+      setIsImporting(false);
+      // 清空文件选择
+      event.target.value = '';
+    }
+  };
+  
+  // 批量设置用户角色
+  const handleBatchSetRole = async (role: 'admin' | 'user') => {
+    if (selectedUserIds.length === 0) {
+      toast.error('请先选择要修改的用户');
+      return;
+    }
+    
+    try {
+      setBatchRoleLoading(true);
+      
+      const response = await fetch('/api/users/batch-role', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userIds: selectedUserIds,
+          role: role
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || '设置角色失败');
+      }
+      
+      if (result.success) {
+        toast.success(result.message);
+        
+        // 更新本地用户列表中的角色
+        setUsers(prev => prev.map(user => {
+          if (selectedUserIds.includes(user.id)) {
+            return { ...user, role: role };
+          }
+          return user;
+        }));
+        
+        // 清空选中状态
+        setSelectedUserIds([]);
+        setSelectAll(false);
+      } else {
+        toast.error(result.error || '设置角色失败');
+      }
+    } catch (error: any) {
+      console.error('批量设置角色失败:', error);
+      toast.error(error.message || '设置角色过程中发生错误');
+    } finally {
+      setBatchRoleLoading(false);
+    }
+  };
+  
   // 处理密码修改提交
   const handlePasswordChange = async () => {
     if (!selectedUser) return;
@@ -326,14 +436,52 @@ export default function UsersManagement() {
             刷新数据
           </Button>
           
-          {selectedUserIds.length > 0 && (
+          {/* Excel导入按钮 */}
+          <div className="relative">
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleExcelImport}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              disabled={isImporting}
+            />
             <Button
-              variant="destructive"
-              onClick={() => setIsDeleteConfirmOpen(true)}
+              className="bg-purple-600 hover:bg-purple-700"
+              disabled={isImporting}
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              批量删除 ({selectedUserIds.length})
+              <Upload className="h-4 w-4 mr-2" />
+              {isImporting ? '导入中...' : 'Excel导入'}
             </Button>
+          </div>
+          
+          {selectedUserIds.length > 0 && (
+            <>
+              <Button
+                className="bg-orange-600 hover:bg-orange-700"
+                onClick={() => handleBatchSetRole('admin')}
+                disabled={isBatchRoleLoading}
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                {isBatchRoleLoading ? '设置中...' : `设为管理员 (${selectedUserIds.length})`}
+              </Button>
+              
+              <Button
+                className="bg-gray-600 hover:bg-gray-700"
+                onClick={() => handleBatchSetRole('user')}
+                disabled={isBatchRoleLoading}
+              >
+                <User className="h-4 w-4 mr-2" />
+                {isBatchRoleLoading ? '设置中...' : `设为普通用户 (${selectedUserIds.length})`}
+              </Button>
+              
+              <Button
+                variant="destructive"
+                onClick={() => setIsDeleteConfirmOpen(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                批量删除 ({selectedUserIds.length})
+              </Button>
+            </>
           )}
           
           <Dialog>
@@ -565,6 +713,63 @@ export default function UsersManagement() {
             >
               <Trash2 className="h-4 w-4 mr-2" />
               确认删除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Excel导入结果对话框 */}
+      <Dialog open={isImportResultsOpen} onOpenChange={setIsImportResultsOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-green-600">
+              <CheckCircle2 className="h-5 w-5 mr-2" />
+              Excel导入结果
+            </DialogTitle>
+            <DialogDescription>
+              以下是Excel文件导入的详细结果
+            </DialogDescription>
+          </DialogHeader>
+          
+          {importResults && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="text-2xl font-bold text-green-600">{importResults.success}</div>
+                  <div className="text-sm text-green-700">成功创建</div>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="text-2xl font-bold text-blue-600">{importResults.skipped}</div>
+                  <div className="text-sm text-blue-700">跳过已存在</div>
+                </div>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <div className="text-2xl font-bold text-red-600">{importResults.failed}</div>
+                  <div className="text-sm text-red-700">导入失败</div>
+                </div>
+              </div>
+              
+              <div className="text-sm text-gray-600">
+                <strong>总计:</strong> {importResults.total} 条记录
+              </div>
+              
+              {importResults.errors && importResults.errors.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-red-600 mb-2">错误详情:</h4>
+                  <div className="max-h-40 overflow-y-auto border rounded-md p-2 bg-red-50">
+                    {importResults.errors.map((error: string, index: number) => (
+                      <div key={index} className="text-sm text-red-700 py-1">
+                        • {error}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button onClick={() => setIsImportResultsOpen(false)}>
+              确定
             </Button>
           </DialogFooter>
         </DialogContent>
