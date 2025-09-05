@@ -28,6 +28,7 @@ export interface UserItem {
 }
 
 // URL类型枚举
+// 注意：internal_terminal 已废弃，仅为兼容性保留
 export type UrlType = 'internal' | 'terminal' | 'internal_terminal';
 
 // URL类型选项接口
