@@ -346,8 +346,8 @@ export const urlTypeOptions: UrlTypeOption[] = [
   // },
   { 
     value: "internal", 
-    label: "内网链接", 
-    description: "内网地址，在浏览器中打开" 
+    label: "URL跳转", 
+    description: "直接在浏览器新标签页中打开链接" 
   },
   { 
     value: "terminal", 

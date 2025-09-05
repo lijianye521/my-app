@@ -176,12 +176,13 @@ export default function FormDialog({
               onChange={(e) =>
                 setFormData({ ...formData, urlType: e.target.value as UrlType })
               }
-              className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+              className="w-full px-3 py-2 pr-8 border border-gray-200 rounded-md shadow-sm focus:outline-none appearance-none bg-white text-gray-900"
               style={{
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
                 backgroundPosition: 'right 0.5rem center',
                 backgroundRepeat: 'no-repeat',
                 backgroundSize: '1.5em 1.5em',
+                boxSizing: 'border-box',
               }}
             >
               {urlTypeOptions.map((option) => (
@@ -207,7 +208,7 @@ export default function FormDialog({
                   ? "请输入windlocal命令，如：windlocal://open?cmd=notepad"
                   // : formData.urlType === 'internal_terminal'
                   // ? "请输入相对路径，如：/api/test（会自动与当前域名拼接）"
-                  : "请输入内网链接地址，如：http://10.106.19.29:8090/"
+                  : "请输入链接地址，如：http://10.106.19.29:8090/"
               }
             />
           </div>

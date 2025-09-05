@@ -204,4 +204,23 @@
    opacity: 1;
    animation: borderAnimation 3s ease infinite;
  }
+
+/* 修复select下拉选项的黑线问题，不影响布局 */
+select option {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: white !important;
+  color: #374151 !important;
+}
+
+select option:focus,
+select option:checked,
+select option:hover {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
  
