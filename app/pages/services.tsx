@@ -90,16 +90,16 @@ function ServiceCard({ service }: { service: ServiceItem }) {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
-          <div className="flex-1">
+        <CardContent className="space-y-4">
+          <div className="min-h-[20px]">
             {service.description && (
-              <p className="text-gray-600 mb-4 truncate" title={service.description}>
+              <p className="text-gray-600 text-sm truncate" title={service.description}>
                 {service.description}
               </p>
             )}
           </div>
           <Button
-            className="w-full bg-transparent mt-auto"
+            className="w-full bg-transparent"
             variant="outline"
             disabled
           >
@@ -188,16 +188,16 @@ function SortableServiceItem({ service, isSorting, onEdit, onDelete }: SortableS
             )}
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
-          <div className="flex-1">
+        <CardContent className="space-y-4">
+          <div className="min-h-[20px]">
             {service.description && (
-              <p className="text-gray-600 mb-4 truncate" title={service.description}>
+              <p className="text-gray-600 text-sm truncate" title={service.description}>
                 {service.description}
               </p>
             )}
           </div>
           <Button
-            className="w-full bg-transparent mt-auto"
+            className="w-full bg-transparent"
             variant="outline"
             onClick={() => openService(service.url, service.urlType)}
             disabled={isSorting}
@@ -423,16 +423,16 @@ export default function Services({
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
-                    <div className="flex-1">
+                  <CardContent className="space-y-4">
+                    <div className="min-h-[20px]">
                       {service.description && (
-                        <p className="text-gray-600 mb-4 truncate" title={service.description}>
+                        <p className="text-gray-600 text-sm truncate" title={service.description}>
                           {service.description}
                         </p>
                       )}
                     </div>
                     <Button
-                      className="w-full bg-transparent mt-auto"
+                      className="w-full bg-transparent"
                       variant="outline"
                       onClick={() => openService(service.url, service.urlType)}
                     >
