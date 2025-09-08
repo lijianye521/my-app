@@ -59,53 +59,70 @@ export default function Dashboard({
             className="h-64 cursor-pointer hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 border-none"
             onClick={handleForumClick}
           >
-            <CardContent className="h-full flex flex-col items-center justify-center text-white p-8">
-              <MessageSquare className="h-16 w-16 mb-4" />
-              <h2 className="text-3xl font-bold mb-2">技术论坛</h2>
-              <p className="text-lg text-center mb-6 text-blue-100">
+            <CardContent className="h-full flex flex-col items-center justify-center text-white p-6 relative">
+              <MessageSquare className="h-14 w-14 mb-3" />
+              <h2 className="text-2xl font-bold mb-2">技术论坛</h2>
+              <p className="text-base text-center mb-4 text-blue-100 max-w-sm">
                 新员工学习交流平台，技术分享与问题讨论
               </p>
-              <Button
-                size="lg"
-                variant="outline"
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                onClick={handleForumClick}
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                访问论坛
-              </Button>
+              <div className="flex justify-center w-full">
+                <Button
+                  size="default"
+                  variant="outline" 
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 transition-all duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleForumClick();
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  访问论坛
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         <div className="space-y-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Settings className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <div className="font-semibold">管理平台</div>
-                  <div className="text-sm text-gray-500">
-                    {managementPlatforms.length}个平台
+          <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-blue-200">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+                    <Settings className="h-6 w-6 text-white" />
                   </div>
+                  <div>
+                    <div className="font-bold text-lg text-gray-800">管理平台</div>
+                    <div className="text-sm text-blue-600 font-medium">
+                      专业管理工具集
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-blue-600">{managementPlatforms.length}</div>
+                  <div className="text-xs text-gray-500">个平台</div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Database className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <div className="font-semibold">技术服务</div>
-                  <div className="text-sm text-gray-500">
-                    {techServices.length}个服务
+          <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-green-200">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
+                    <Database className="h-6 w-6 text-white" />
                   </div>
+                  <div>
+                    <div className="font-bold text-lg text-gray-800">技术服务</div>
+                    <div className="text-sm text-green-600 font-medium">
+                      核心技术支撑
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-green-600">{techServices.length}</div>
+                  <div className="text-xs text-gray-500">个服务</div>
                 </div>
               </div>
             </CardContent>

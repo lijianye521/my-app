@@ -71,7 +71,7 @@ function ServiceCard({ service }: { service: ServiceItem }) {
   
   return (
     <div className="gradient-border">
-      <Card className="bg-white group">
+      <Card className="bg-white group h-48">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -79,7 +79,7 @@ function ServiceCard({ service }: { service: ServiceItem }) {
               <div className="mr-1 text-gray-400">
                 <GripVertical className="h-5 w-5" />
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className={`w-12 h-12 ${service.color} rounded-lg flex items-center justify-center`}>
                 <Icon className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -90,10 +90,16 @@ function ServiceCard({ service }: { service: ServiceItem }) {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-4">{service.description}</p>
+        <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
+          <div className="flex-1">
+            {service.description && (
+              <p className="text-gray-600 mb-4 truncate" title={service.description}>
+                {service.description}
+              </p>
+            )}
+          </div>
           <Button
-            className="w-full bg-transparent"
+            className="w-full bg-transparent mt-auto"
             variant="outline"
             disabled
           >
@@ -136,7 +142,7 @@ function SortableServiceItem({ service, isSorting, onEdit, onDelete }: SortableS
   
   return (
     <div ref={setNodeRef} style={style} className="gradient-border touch-none" {...attributes} {...listeners}>
-      <Card className={`bg-white group ${isDragging ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}>
+      <Card className={`bg-white group h-48 ${isDragging ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -145,7 +151,7 @@ function SortableServiceItem({ service, isSorting, onEdit, onDelete }: SortableS
                   <GripVertical className="h-5 w-5" />
                 </div>
               )}
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className={`w-12 h-12 ${service.color} rounded-lg flex items-center justify-center`}>
                 <Icon className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -182,10 +188,16 @@ function SortableServiceItem({ service, isSorting, onEdit, onDelete }: SortableS
             )}
           </div>
         </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-4">{service.description}</p>
+        <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
+          <div className="flex-1">
+            {service.description && (
+              <p className="text-gray-600 mb-4 truncate" title={service.description}>
+                {service.description}
+              </p>
+            )}
+          </div>
           <Button
-            className="w-full bg-transparent"
+            className="w-full bg-transparent mt-auto"
             variant="outline"
             onClick={() => openService(service.url, service.urlType)}
             disabled={isSorting}
@@ -299,7 +311,6 @@ export default function Services({
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">技术服务</h2>
         <div className="flex items-center gap-2">
-          <Badge variant="secondary">{techServices.length}个服务</Badge>
           
           {/* 排序按钮 */}
           <Button
@@ -373,11 +384,11 @@ export default function Services({
             const Icon = getIconByName(service.iconName);
             return (
               <div key={service.id} className="gradient-border">
-                <Card className="bg-white group">
+                <Card className="bg-white group h-48">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <div className={`w-12 h-12 ${service.color} rounded-lg flex items-center justify-center`}>
                           <Icon className="h-6 w-6 text-white" />
                         </div>
                         <div>
@@ -412,10 +423,16 @@ export default function Services({
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-4">{service.description}</p>
+                  <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
+                    <div className="flex-1">
+                      {service.description && (
+                        <p className="text-gray-600 mb-4 truncate" title={service.description}>
+                          {service.description}
+                        </p>
+                      )}
+                    </div>
                     <Button
-                      className="w-full bg-transparent"
+                      className="w-full bg-transparent mt-auto"
                       variant="outline"
                       onClick={() => openService(service.url, service.urlType)}
                     >
