@@ -339,11 +339,7 @@ export const colorOptions: ColorOption[] = [
 
 // URL类型选项
 export const urlTypeOptions: UrlTypeOption[] = [
-  // { 
-  //   value: "internal_terminal", 
-  //   label: "终端内跳转", 
-  //   description: "使用当前域名拼接URL并在浏览器中打开" 
-  // },
+
   { 
     value: "internal", 
     label: "URL跳转", 
