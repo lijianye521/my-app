@@ -61,7 +61,7 @@ export default function RootLayout({
               },
               components: {
                 Button: {
-                  borderRadius: 8,
+                  borderRadius: 10,
                   paddingInline: 16,
                   paddingBlock: 8,
                 },
@@ -85,6 +85,8 @@ export default function RootLayout({
                   itemHoverBg: '#fafafa', // 悬停状态的背景
                   itemSelectedColor: '#171717', // 选中状态的文字颜色
                   itemActiveBg: '#f5f5f5', // 点击时的背景色，与选中色保持一致
+                  itemPadding: '12px 16px', // 增加菜单项内边距
+                  iconMarginInlineEnd: 12, // 图标与文字的间距
                 }
               },
               algorithm: theme.defaultAlgorithm,

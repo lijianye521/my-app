@@ -223,4 +223,25 @@ select option:hover {
   background-color: #f3f4f6 !important;
   color: #1f2937 !important;
 }
- 
+ /* 确保按钮保持黑色主题 */
+.ant-btn-primary {
+  background-color: #171717 !important;
+  border-color: #171717 !important;
+}
+
+.ant-btn-primary:hover {
+  background-color: #262626 !important;
+  border-color: #262626 !important;
+}
+
+/* 优化侧边栏Menu样式 */
+.ant-menu-inline .ant-menu-item {
+  padding-inline: 16px !important;
+  margin-block: 2px !important;
+  height: 44px !important;
+  line-height: 44px !important;
+}
+
+.ant-menu-inline .ant-menu-item .ant-menu-item-icon {
+  margin-inline-end: 12px !important;
+}

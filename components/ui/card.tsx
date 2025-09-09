@@ -6,7 +6,6 @@ function Card({ className, children, ...props }: React.ComponentProps<"div"> & A
   return (
     <AntCard 
       className={className}
-      variant="borderless"
       {...props}
     >
       {children}
