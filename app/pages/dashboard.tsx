@@ -85,7 +85,7 @@ export default function Dashboard({
 
         <div className="space-y-4">
           <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-blue-200">
-            <CardContent className="p-5">
+            <CardContent className="p-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
@@ -94,7 +94,7 @@ export default function Dashboard({
                   <div>
                     <div className="font-bold text-lg text-gray-800">管理平台</div>
                     <div className="text-sm text-blue-600 font-medium">
-                      专业管理工具集
+                      管理平台集
                     </div>
                   </div>
                 </div>
@@ -107,7 +107,7 @@ export default function Dashboard({
           </Card>
 
           <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-green-200">
-            <CardContent className="p-5">
+            <CardContent className="p-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
@@ -116,7 +116,7 @@ export default function Dashboard({
                   <div>
                     <div className="font-bold text-lg text-gray-800">技术服务</div>
                     <div className="text-sm text-green-600 font-medium">
-                      核心技术支撑
+                      提供技术服务
                     </div>
                   </div>
                 </div>
