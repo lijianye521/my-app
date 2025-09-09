@@ -53,11 +53,13 @@ function openService(url: string, urlType?: string) {
   if (urlType === 'internal') {
     // 内网链接 - 在新标签页中打开
     window.open(url, '_blank');
-  } else if (urlType === 'internal_terminal') {
-    // 终端内跳转 - 使用当前域名拼接
-    const fullUrl = window.location.origin + url;
-    window.open(fullUrl, '_blank');
-  } else {
+  } 
+  // else if (urlType === 'internal_terminal') {
+  //   // 终端内跳转 - 使用当前域名拼接
+  //   const fullUrl = window.location.origin + url;
+  //   window.open(fullUrl, '_blank');
+  // } 
+  else {
     // 终端命令或默认情况 - 使用windlocal协议
     window.location.href = "windlocal://open?" + encodeURIComponent(url);
   }

@@ -36,7 +36,7 @@ export default function FormDialog({
     url: editingItem?.url || "",
     icon: editingItem?.iconName || "Settings",  // 修正这里，使用iconName
     color: editingItem?.color || "bg-blue-500",
-    urlType: (editingItem?.urlType as UrlType) || "internal_terminal",
+    urlType: (editingItem?.urlType as UrlType) || "internal",
     otherInformation: editingItem?.otherInformation || "",
   });
 
@@ -65,7 +65,7 @@ export default function FormDialog({
       url: "",
       icon: "Settings",
       color: "bg-blue-500",
-      urlType: "internal_terminal",
+      urlType: "internal",
       otherInformation: "",
     });
   };
@@ -205,8 +205,8 @@ export default function FormDialog({
               placeholder={
                 formData.urlType === 'terminal'
                   ? "请输入windlocal命令，如：windlocal://open?cmd=notepad"
-                  : formData.urlType === 'internal_terminal'
-                  ? "请输入相对路径，如：/api/test（会自动与当前域名拼接）"
+                  // : formData.urlType === 'internal_terminal'
+                  // ? "请输入相对路径，如：/api/test（会自动与当前域名拼接）"
                   : "请输入内网链接地址，如：http://10.106.19.29:8090/"
               }
             />
