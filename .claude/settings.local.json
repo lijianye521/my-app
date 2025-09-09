@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "WebFetch(domain:ant.design)"
+      "WebFetch(domain:ant.design)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []
