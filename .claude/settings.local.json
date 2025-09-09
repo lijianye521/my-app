@@ -4,7 +4,8 @@
       "WebSearch",
       "WebFetch(domain:ant.design)",
       "Bash(git log:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(sed:*)"
     ],
     "deny": [],
     "ask": []

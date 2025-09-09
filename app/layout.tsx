@@ -61,13 +61,22 @@ export default function RootLayout({
               },
               components: {
                 Button: {
+                  colorPrimary: '#171717', // 主色
+                  colorPrimaryHover: '#262626', // 悬停色
+                  colorPrimaryActive: '#404040', // 激活色
+                  colorPrimaryBorder: '#171717', // 边框色
                   borderRadius: 10,
                   paddingInline: 16,
                   paddingBlock: 8,
+                  primaryShadow: 'none', // 移除阴影
                 },
                 Card: {
                   borderRadius: 12,
                   paddingLG: 24,
+                  padding: 16, // 默认内边距
+                  paddingSM: 12, // 小型卡片内边距
+                  colorBorderSecondary: '#f0f0f0', // 边框色
+                  boxShadowTertiary: '0 1px 2px 0 rgba(0, 0, 0, 0.03)', // 阴影
                 },
                 Input: {
                   borderRadius: 8,
