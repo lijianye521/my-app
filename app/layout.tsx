@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider, theme } from "antd";
 import zhCN from 'antd/locale/zh_CN';
+import ConsoleFilter from "@/components/ConsoleFilter";
 
 export const metadata: Metadata = {
   title: "Stock Lab",
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <ConsoleFilter />
         <AntdRegistry>
           <ConfigProvider
             locale={zhCN}

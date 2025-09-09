@@ -47,6 +47,8 @@ export default function FormDialog({
   itemType,
 }: FormDialogProps) {
   const { token } = theme.useToken();
+  const [form] = Form.useForm();
+  const { Title, Text, Paragraph } = Typography;
 
   const handleClose = () => {
     form.resetFields();
@@ -57,10 +59,6 @@ export default function FormDialog({
     onSubmit(values);
     handleClose();
   };
-
-
-  const [form] = Form.useForm();
-  const { Title, Text, Paragraph } = Typography;
 
   // 当editingItem变化时，重置表单数据
   const [selectedIcon, setSelectedIcon] = useState<string>("Settings");
@@ -117,7 +115,13 @@ export default function FormDialog({
         </Button>,
       ]}
       width={800}
-      bodyStyle={{ maxHeight: '70vh', overflowY: 'auto', padding: '12px 24px' }}
+      styles={{ 
+        body: { 
+          maxHeight: '70vh', 
+          overflowY: 'auto', 
+          padding: '12px 24px' 
+        } 
+      }}
     >
 
         <Form
