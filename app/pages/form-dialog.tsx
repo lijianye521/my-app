@@ -132,8 +132,8 @@ export default function FormDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh]">
-        <div className="max-h-[75vh] overflow-y-auto pr-4 mr-2">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden">
+        <div className="max-h-[75vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {editingItem ? "编辑" : "新增"}

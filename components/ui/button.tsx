@@ -17,17 +17,17 @@ const getAntButtonType = (variant?: ButtonVariant): AntButtonProps['type'] => {
     case 'default':
       return 'primary';
     case 'destructive':
-      return 'primary';
+      return 'primary'; // 将使用danger属性
     case 'outline':
       return 'default';
     case 'secondary':
-      return 'default';
+      return 'dashed';
     case 'ghost':
       return 'text';
     case 'link':
       return 'link';
     default:
-      return 'primary';
+      return 'default';
   }
 };
 

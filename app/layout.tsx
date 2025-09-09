@@ -39,7 +39,7 @@ export default function RootLayout({
                 colorBorderSecondary: '#f5f5f5', // lighter border
                 
                 // 边框和圆角
-                borderRadius: 10, // 更圆润的边角，匹配现有设计
+                borderRadius: 8, // 标准圆角，与现代设计保持一致
                 borderRadiusLG: 12,
                 borderRadiusSM: 6,
                 
@@ -54,18 +54,10 @@ export default function RootLayout({
                 paddingLG: 24,
                 paddingSM: 12,
                 paddingXS: 8,
-                
-                // 阴影
-                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
-                boxShadowSecondary: '0 4px 12px 0 rgba(0, 0, 0, 0.08)',
               },
               components: {
                 Button: {
-                  colorPrimary: '#171717', // 主色
-                  colorPrimaryHover: '#262626', // 悬停色
-                  colorPrimaryActive: '#404040', // 激活色
-                  colorPrimaryBorder: '#171717', // 边框色
-                  borderRadius: 10,
+                  borderRadius: 8,
                   paddingInline: 16,
                   paddingBlock: 8,
                   primaryShadow: 'none', // 移除阴影
@@ -73,9 +65,6 @@ export default function RootLayout({
                 Card: {
                   borderRadius: 12,
                   paddingLG: 24,
-                  padding: 16, // 默认内边距
-                  paddingSM: 12, // 小型卡片内边距
-                  colorBorderSecondary: '#f0f0f0', // 边框色
                   boxShadowTertiary: '0 1px 2px 0 rgba(0, 0, 0, 0.03)', // 阴影
                 },
                 Input: {
@@ -85,6 +74,17 @@ export default function RootLayout({
                 },
                 Modal: {
                   borderRadius: 12,
+                  // 修复Modal的padding和位置问题
+                  padding: 0, // 重置默认padding，使用自定义样式
+                  paddingLG: 0, 
+                  paddingSM: 0,
+                  headerBg: '#ffffff',
+                  contentBg: '#ffffff',
+                  footerBg: '#ffffff',
+                  // Modal位置相关配置
+                  margin: 0,
+                  marginLG: 0,
+                  marginSM: 0,
                 },
                 Tag: {
                   borderRadius: 6,

@@ -224,6 +224,45 @@ select option:hover {
   color: #1f2937 !important;
 }
 
+/* 优化Ant Design组件样式 */
+
+/* 修复Modal居中和内容样式问题 */
+.ant-modal {
+  top: 50%;
+  transform: translateY(-50%);
+  padding-bottom: 0;
+}
+
+.ant-modal-content {
+  padding: 0;
+}
+
+.ant-modal-body {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.ant-modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0;
+}
+
+.ant-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 0;
+}
+
+/* 优化Button样式 */
+.ant-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 /* 优化侧边栏Menu样式 */
 .ant-menu-inline .ant-menu-item {
   padding-inline: 16px !important;
