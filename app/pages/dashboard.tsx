@@ -69,7 +69,7 @@ export default function Dashboard({
                 <Button
                   size="default"
                   variant="outline" 
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 transition-all duration-200"
+                  className="bg-white/30 border-white/40 text-white hover:bg-white/40 backdrop-blur-sm transition-all duration-200"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleForumClick();
