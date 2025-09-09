@@ -87,7 +87,7 @@ export default function FormDialog({
 
   const renderIconGrid = () => {
     return (
-      <div className="grid grid-cols-8 gap-2 max-h-48 overflow-y-auto p-2 border rounded">
+      <div className="grid grid-cols-6 gap-3 max-h-48 overflow-y-auto p-2 border rounded">
         {iconOptions.map((option) => {
           const IconComponent = option.icon;
           return (

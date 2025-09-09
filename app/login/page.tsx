@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -164,9 +164,15 @@ export default function LoginPage() {
             </div>
             
             <Button
-              type="submit"
+              type="primary"
+              htmlType="submit"
               className="w-full"
               disabled={loading}
+              style={{ 
+                backgroundColor: '#000000', 
+                borderColor: '#000000',
+                color: '#ffffff'
+              }}
             >
               {loading ? "登录中..." : "登录"}
             </Button>

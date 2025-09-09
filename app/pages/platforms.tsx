@@ -92,16 +92,16 @@ function PlatformCard({ platform }: { platform: PlatformItem }) {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
-          <div className="flex-1">
+        <CardContent className="space-y-4">
+          <div className="min-h-[20px]">
             {platform.description && (
-              <p className="text-gray-600 mb-4 truncate" title={platform.description}>
+              <p className="text-gray-600 text-sm truncate" title={platform.description}>
                 {platform.description}
               </p>
             )}
           </div>
           <Button
-            className="w-full bg-transparent mt-auto"
+            className="w-full bg-transparent"
             variant="outline"
             disabled
           >
@@ -192,16 +192,16 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
             )}
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
-          <div className="flex-1">
+        <CardContent className="space-y-4">
+          <div className="min-h-[20px]">
             {platform.description && (
-              <p className="text-gray-600 mb-4 truncate" title={platform.description}>
+              <p className="text-gray-600 text-sm truncate" title={platform.description}>
                 {platform.description}
               </p>
             )}
           </div>
           <Button
-            className="w-full bg-transparent mt-auto"
+            className="w-full bg-transparent"
             variant="outline"
             onClick={() => openPlatform(platform.url, platform.urlType)}
             disabled={isSorting}
@@ -429,16 +429,16 @@ export default function Platforms({
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
-                    <div className="flex-1">
+                  <CardContent className="space-y-4">
+                    <div className="min-h-[20px]">
                       {platform.description && (
-                        <p className="text-gray-600 mb-4 truncate" title={platform.description}>
+                        <p className="text-gray-600 text-sm truncate" title={platform.description}>
                           {platform.description}
                         </p>
                       )}
                     </div>
                     <Button
-                      className="w-full bg-transparent mt-auto"
+                      className="w-full bg-transparent"
                       variant="outline"
                       onClick={() => openPlatform(platform.url, platform.urlType)}
                     >
