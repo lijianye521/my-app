@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Trash2, Eye, RefreshCw, Filter } from 'lucide-react';
+import { Card, Button, Tag, Typography, Space, Input, Select, Spin, theme } from 'antd';
+import { DeleteOutlined, EyeOutlined, ReloadOutlined, FilterOutlined, LeftOutlined } from '@ant-design/icons';
 // @ts-ignore - 忽略类型检查以解决react-virtualized导入问题
 import { List, AutoSizer } from 'react-virtualized';
 
@@ -41,6 +39,9 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
     startDate: '',
     endDate: ''
   });
+  
+  const { token } = theme.useToken();
+  const { Title, Text, Paragraph } = Typography;
   
   // 日志项的估计高度 - 增加高度以避免重叠
   const estimatedRowHeight = 140; // 增加高度以容纳所有内容
@@ -107,15 +108,15 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
   const getOperationTypeInfo = (type: string) => {
     switch (type) {
       case 'add':
-        return { color: 'bg-green-500', text: '新增' };
+        return { color: 'success', text: '新增' };
       case 'update':
-        return { color: 'bg-blue-500', text: '更新' };
+        return { color: 'processing', text: '更新' };
       case 'delete':
-        return { color: 'bg-red-500', text: '删除' };
+        return { color: 'error', text: '删除' };
       case 'access':
-        return { color: 'bg-gray-500', text: '访问' };
+        return { color: 'default', text: '访问' };
       default:
-        return { color: 'bg-gray-400', text: type };
+        return { color: 'default', text: type };
     }
   };
 
@@ -202,37 +203,60 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
         style={{
           ...style,
           height: estimatedRowHeight - 8, // 减去margin的高度
-          paddingBottom: '8px' // 添加底部间距
-        }} 
-        className="border rounded-lg p-4 hover:bg-gray-50 mx-2 mb-2 bg-white shadow-sm"
+          paddingBottom: '8px', // 添加底部间距
+          margin: '0 8px 8px 8px'
+        }}
       >
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center space-x-2 flex-wrap">
-            <Badge className={`${operationInfo.color} text-white shrink-0`}>
-              {operationInfo.text}
-            </Badge>
-            <span className="font-medium text-sm">{log.service_code}</span>
-            <span className="text-gray-500 text-sm">
-              by {log.nickname || log.username}
-            </span>
+        <Card
+          size="small"
+          style={{
+            height: '100%',
+            cursor: 'default'
+          }}
+          styles={{
+            body: { padding: '12px 16px' }
+          }}
+          hoverable
+        >
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'flex-start', 
+            justifyContent: 'space-between', 
+            marginBottom: 12 
+          }}>
+            <Space wrap size="small">
+              <Tag color={operationInfo.color as any}>
+                {operationInfo.text}
+              </Tag>
+              <Text strong style={{ fontSize: 13 }}>
+                {log.service_code}
+              </Text>
+              <Text type="secondary" style={{ fontSize: 13 }}>
+                by {log.nickname || log.username}
+              </Text>
+            </Space>
+            <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>
+              {new Date(log.created_at).toLocaleString('zh-CN')}
+            </Text>
           </div>
-          <span className="text-sm text-gray-500 shrink-0">
-            {new Date(log.created_at).toLocaleString('zh-CN')}
-          </span>
-        </div>
-        <div className="text-sm text-gray-700 mb-2 break-words" style={{ 
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          lineHeight: '1.4em',
-          maxHeight: '2.8em'
-        }}>
-          {formatOperationDetail(log.operation_detail)}
-        </div>
-        <div className="text-xs text-gray-500 truncate">
-          IP: {log.ip_address} | {log.user_agent.length > 50 ? log.user_agent.substring(0, 50) + '...' : log.user_agent}
-        </div>
+          <div style={{
+            fontSize: 13,
+            color: token.colorText,
+            marginBottom: 8,
+            wordBreak: 'break-all',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            lineHeight: '1.4em',
+            maxHeight: '2.8em'
+          }}>
+            {formatOperationDetail(log.operation_detail)}
+          </div>
+          <Text type="secondary" style={{ fontSize: 11 }} ellipsis>
+            IP: {log.ip_address} | {log.user_agent.length > 50 ? log.user_agent.substring(0, 50) + '...' : log.user_agent}
+          </Text>
+        </Card>
       </div>
     );
   };
@@ -245,174 +269,227 @@ export default function OperationLogs({ onBack }: OperationLogsProps) {
   // 不再需要清除缓存，因为我们使用固定高度
 
   return (
-    <div className="space-y-6">
-      {/* 调试信息 */}
-      {/* <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-        <p><strong>调试信息:</strong> 操作日志页面已加载</p>
-        <p>总日志数量: {allLogs.length} | 过滤后数量: {filteredLogs.length} | 加载状态: {loading ? '加载中' : '已完成'}</p>
-      </div> */}
-
+    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 页面头部 */}
-      <div className="flex items-center justify-between">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <Button onClick={onBack} variant="outline" className="mb-4">
-            ← 返回
-          </Button>
-          <h1 className="text-2xl font-bold">用户操作日志</h1>
-          <p className="text-gray-600">查看和管理系统操作记录</p>
-        </div>
-        <div className="flex gap-2">
           <Button 
+            onClick={onBack} 
+            icon={<LeftOutlined />}
+            style={{ marginBottom: 16 }}
+          >
+            返回
+          </Button>
+          <Title level={2} style={{ margin: 0, marginBottom: 8 }}>
+            用户操作日志
+          </Title>
+          <Paragraph type="secondary" style={{ margin: 0 }}>
+            查看和管理系统操作记录
+          </Paragraph>
+        </div>
+        <Space>
+          <Button 
+            icon={<ReloadOutlined spin={loading} />}
             onClick={() => fetchLogs()} 
-            variant="outline" 
             disabled={loading}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             刷新
           </Button>
           <Button 
+            icon={<DeleteOutlined />}
             onClick={cleanExpiredLogs} 
-            variant="outline" 
             disabled={loading}
+            danger
           >
-            <Trash2 className="h-4 w-4 mr-2" />
             清理过期日志
           </Button>
-        </div>
+        </Space>
       </div>
 
       {/* 筛选器 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Filter className="h-5 w-5 mr-2" />
-            筛选条件
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">操作类型</label>
-              <select
-                value={filters.operationType}
-                onChange={(e) => setFilters({ ...filters, operationType: e.target.value })}
-                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white shadow-sm hover:border-gray-400 transition-colors"
-              >
-                <option value="">全部</option>
-                <option value="add">新增</option>
-                <option value="update">更新</option>
-                <option value="delete">删除</option>
-                <option value="access">访问</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">服务代码</label>
-              <input
-                type="text"
-                value={filters.serviceCode}
-                onChange={(e) => setFilters({ ...filters, serviceCode: e.target.value })}
-                placeholder="输入服务代码"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white shadow-sm hover:border-gray-400 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">开始日期</label>
-              <input
-                type="date"
-                value={filters.startDate}
-                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white shadow-sm hover:border-gray-400 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">结束日期</label>
-              <input
-                type="date"
-                value={filters.endDate}
-                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white shadow-sm hover:border-gray-400 transition-colors"
-              />
-            </div>
+      <Card
+        title={
+          <Space align="center">
+            <FilterOutlined style={{ fontSize: 20, color: token.colorPrimary }} />
+            <span>筛选条件</span>
+          </Space>
+        }
+      >
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+          gap: 16,
+          marginBottom: 16
+        }}>
+          <div>
+            <Text style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>
+              操作类型
+            </Text>
+            <Select
+              value={filters.operationType}
+              onChange={(value) => setFilters({ ...filters, operationType: value })}
+              placeholder="全部"
+              style={{ width: '100%' }}
+              allowClear
+            >
+              <Select.Option value="add">新增</Select.Option>
+              <Select.Option value="update">更新</Select.Option>
+              <Select.Option value="delete">删除</Select.Option>
+              <Select.Option value="access">访问</Select.Option>
+            </Select>
           </div>
-          <div className="mt-4">
-            <Button             onClick={() => {
+          <div>
+            <Text style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>
+              服务代码
+            </Text>
+            <Input
+              value={filters.serviceCode}
+              onChange={(e) => setFilters({ ...filters, serviceCode: e.target.value })}
+              placeholder="输入服务代码"
+              allowClear
+            />
+          </div>
+          <div>
+            <Text style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>
+              开始日期
+            </Text>
+            <Input
+              type="date"
+              value={filters.startDate}
+              onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+            />
+          </div>
+          <div>
+            <Text style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>
+              结束日期
+            </Text>
+            <Input
+              type="date"
+              value={filters.endDate}
+              onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+            />
+          </div>
+        </div>
+        <Space>
+          <Button 
+            type="primary"
+            onClick={() => {
               // 只触发过滤条件更新，不需要重新请求
               console.log("应用本地筛选");
             }} 
-            disabled={loading}>
+            disabled={loading}
+          >
             应用筛选
           </Button>
           <Button 
             onClick={() => {
               setFilters({ operationType: '', serviceCode: '', startDate: '', endDate: '' });
-            }}  
-              variant="outline" 
-              className="ml-2"
-            >
-              重置
-            </Button>
-          </div>
-        </CardContent>
+            }}
+          >
+            重置
+          </Button>
+        </Space>
       </Card>
 
       {/* 统计信息 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 16
+      }}>
         <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{allLogs.length}</div>
-            <p className="text-gray-600">总记录数</p>
-          </CardContent>
+          <div style={{ padding: 24, textAlign: 'center' }}>
+            <div style={{ 
+              fontSize: 32, 
+              fontWeight: 'bold', 
+              color: token.colorPrimary,
+              marginBottom: 8
+            }}>
+              {allLogs.length}
+            </div>
+            <Text type="secondary">总记录数</Text>
+          </div>
         </Card>
         <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{filteredLogs.length}</div>
-            <p className="text-gray-600">筛选后记录数</p>
-          </CardContent>
+          <div style={{ padding: 24, textAlign: 'center' }}>
+            <div style={{ 
+              fontSize: 32, 
+              fontWeight: 'bold', 
+              color: token.colorSuccess,
+              marginBottom: 8
+            }}>
+              {filteredLogs.length}
+            </div>
+            <Text type="secondary">筛选后记录数</Text>
+          </div>
         </Card>
         <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{loading ? "加载中..." : "已完成"}</div>
-            <p className="text-gray-600">加载状态</p>
-          </CardContent>
+          <div style={{ padding: 24, textAlign: 'center' }}>
+            <div style={{ 
+              fontSize: 24, 
+              fontWeight: 'bold', 
+              color: loading ? token.colorWarning : token.colorSuccess,
+              marginBottom: 8
+            }}>
+              {loading ? "加载中..." : "已完成"}
+            </div>
+            <Text type="secondary">加载状态</Text>
+          </div>
         </Card>
       </div>
 
       {/* 日志列表 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>操作记录</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">
-              <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
-              <p>加载中...</p>
-            </div>
-          ) : filteredLogs.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              暂无操作记录
-            </div>
-          ) : (
-            <div style={{ height: "600px", width: "100%" }} className="relative">
-              <AutoSizer>
-                {({ height, width }: { height: number; width: number }) => (
-                  <List
-                    width={width}
-                    height={height}
-                    rowCount={filteredLogs.length}
-                    rowHeight={estimatedRowHeight}
-                    rowRenderer={renderLogItem}
-                    overscanRowCount={5}
-                    style={{
-                      outline: 'none', // 移除focus轮廓
-                      backgroundColor: '#f9fafb' // 添加背景色
-                    }}
-                  />
-                )}
-              </AutoSizer>
-            </div>
-          )}
-        </CardContent>
+      <Card
+        title={
+          <Space align="center">
+            <EyeOutlined style={{ fontSize: 20, color: token.colorPrimary }} />
+            <span>操作记录</span>
+          </Space>
+        }
+      >
+        {loading ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '32px 0'
+          }}>
+            <Space direction="vertical" align="center">
+              <Spin size="large" />
+              <Text>加载中...</Text>
+            </Space>
+          </div>
+        ) : filteredLogs.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '32px 0'
+          }}>
+            <Text type="secondary">暂无操作记录</Text>
+          </div>
+        ) : (
+          <div style={{ 
+            height: "600px", 
+            width: "100%", 
+            position: 'relative',
+            backgroundColor: token.colorBgLayout,
+            borderRadius: token.borderRadius
+          }}>
+            <AutoSizer>
+              {({ height, width }: { height: number; width: number }) => (
+                <List
+                  width={width}
+                  height={height}
+                  rowCount={filteredLogs.length}
+                  rowHeight={estimatedRowHeight}
+                  rowRenderer={renderLogItem}
+                  overscanRowCount={5}
+                  style={{
+                    outline: 'none',
+                    backgroundColor: token.colorBgLayout
+                  }}
+                />
+              )}
+            </AutoSizer>
+          </div>
+        )}
       </Card>
     </div>
   );

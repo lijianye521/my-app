@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Plus, ExternalLink, Edit, Trash2, GripVertical, Check, ArrowDownWideNarrow, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Button, Card, Tag, Typography, Space, theme } from "antd";
+import { PlusOutlined, ExportOutlined, EditOutlined, DeleteOutlined, MenuOutlined, CheckOutlined, SortAscendingOutlined } from "@ant-design/icons";
 import { PageProps, PlatformItem, ServiceItem } from "./types";
-import { iconOptions } from "./data";
+import { iconOptions, colorOptions } from "./data";
 import toast from "react-hot-toast";
 import {
   DndContext,
@@ -46,6 +44,13 @@ const getIconByName = (iconName: string) => {
   return iconOption ? iconOption.icon : iconOptions[0].icon;
 };
 
+// 获取颜色值
+const getColorByValue = (colorValue: string | undefined) => {
+  if (!colorValue) return '#3b82f6';
+  const colorOption = colorOptions.find((option) => option.value === colorValue);
+  return colorOption ? colorOption.color : '#3b82f6';
+};
+
 // 访问平台的函数 - 根据URL类型选择打开方式
 function openPlatform(url: string, urlType?: string) {
   console.log("openPlatform", { url, urlType });
@@ -68,47 +73,64 @@ function openPlatform(url: string, urlType?: string) {
 // 平台卡片组件 - 用于拖拽覆盖层
 function PlatformCard({ platform }: { platform: PlatformItem }) {
   const Icon = getIconByName(platform.iconName);
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
+  const platformColor = getColorByValue(platform.color);
   
   return (
-    <div className="gradient-border">
-      <Card className="bg-white group h-48">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {/* 添加GripVertical图标，在拖拽覆盖层中显示 */}
-              <div className="mr-1 text-gray-400">
-                <GripVertical className="h-5 w-5" />
-              </div>
-              <div
-                className={`w-12 h-12 ${platform.color} rounded-lg flex items-center justify-center`}
-              >
-                <Icon className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <CardTitle className="group-hover:text-blue-600">
-                  {platform.name}
-                </CardTitle>
-              </div>
+    <div style={{
+      background: `linear-gradient(45deg, ${token.colorPrimary}20, ${token.colorPrimaryBg})`,
+      padding: 2,
+      borderRadius: token.borderRadiusLG
+    }}>
+      <Card
+        style={{
+          backgroundColor: 'white',
+          height: 192,
+          borderRadius: token.borderRadiusLG
+        }}
+        styles={{
+          body: { padding: 0 },
+          header: { padding: '16px 20px', borderBottom: 'none' }
+        }}
+        title={
+          <Space align="center">
+            <MenuOutlined style={{ color: token.colorTextSecondary }} />
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)`,
+                borderRadius: token.borderRadiusLG,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Icon className="h-6 w-6 text-white" />
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="min-h-[20px]">
+            <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
+              {platform.name}
+            </Title>
+          </Space>
+        }
+      >
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ minHeight: 20, marginBottom: 16 }}>
             {platform.description && (
-              <p className="text-gray-600 text-sm truncate" title={platform.description}>
+              <Text type="secondary" style={{ fontSize: 13 }} ellipsis>
                 {platform.description}
-              </p>
+              </Text>
             )}
           </div>
           <Button
-            className="w-full bg-transparent"
-            variant="outline"
+            block
             disabled
+            icon={<ExportOutlined />}
           >
-            <ExternalLink className="h-4 w-4 mr-2" />
             访问平台
           </Button>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );
@@ -132,10 +154,15 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
     isDragging
   } = useSortable({ id: platform.id });
   
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
+  const [isHovered, setIsHovered] = useState(false);
+  const platformColor = getColorByValue(platform.color);
+  
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0 : 1,  // 原位置确实需要隐藏
+    opacity: isDragging ? 0 : 1,
     zIndex: isDragging ? 1 : 0,
     cursor: isSorting ? (isDragging ? 'grabbing' : 'grab') : 'default',
   };
@@ -143,73 +170,102 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
   const Icon = getIconByName(platform.iconName);
   
   return (
-    <div ref={setNodeRef} style={style} className="gradient-border touch-none" {...attributes} {...listeners}>
-      <Card className={`bg-white group h-48 ${isDragging ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...listeners}
+      className="gradient-border touch-none"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Card
+        hoverable={!isSorting}
+        style={{
+          backgroundColor: 'white',
+          height: 192,
+          ...(isDragging && { 
+            boxShadow: `0 0 0 2px ${token.colorPrimary}`,
+            transform: 'scale(1.02)' 
+          })
+        }}
+        styles={{
+          body: { padding: 0 },
+          header: { padding: '16px 20px', borderBottom: 'none' }
+        }}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Space align="center">
               {isSorting && (
-                <div className="mr-1 text-gray-400">
-                  <GripVertical className="h-5 w-5" />
-                </div>
+                <MenuOutlined style={{ color: token.colorTextSecondary }} />
               )}
               <div
-                className={`w-12 h-12 ${platform.color} rounded-lg flex items-center justify-center`}
+                style={{
+                  width: 48,
+                  height: 48,
+                  background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)`,
+                  borderRadius: token.borderRadiusLG,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
               >
                 <Icon className="h-6 w-6 text-white" />
               </div>
-              <div>
-                <CardTitle className="group-hover:text-blue-600">
-                  {platform.name}
-                </CardTitle>
-              </div>
-            </div>
+              <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
+                {platform.name}
+              </Title>
+            </Space>
             {!isSorting && (
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Space 
+                size="small" 
+                style={{ 
+                  opacity: isHovered ? 1 : 0,
+                  transition: 'opacity 0.2s ease-in-out'
+                }}
+              >
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  type="text"
+                  size="small"
+                  icon={<EditOutlined />}
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit?.(platform, "platform");
                   }}
-                  className="h-8 w-8 p-0"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
+                />
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete?.(platform.id, "platform");
                   }}
-                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+                />
+              </Space>
             )}
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="min-h-[20px]">
+        }
+      >
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ minHeight: 20, marginBottom: 16 }}>
             {platform.description && (
-              <p className="text-gray-600 text-sm truncate" title={platform.description}>
+              <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={platform.description}>
                 {platform.description}
-              </p>
+              </Text>
             )}
           </div>
           <Button
-            className="w-full bg-transparent"
-            variant="outline"
+            block
+            type="default"
+            icon={<ExportOutlined />}
             onClick={() => openPlatform(platform.url, platform.urlType)}
             disabled={isSorting}
           >
-            <ExternalLink className="h-4 w-4 mr-2" />
             访问平台
           </Button>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );
@@ -225,6 +281,9 @@ export default function Platforms({
   const [isSorting, setIsSorting] = useState(false);
   const [sortedItems, setSortedItems] = useState([...managementPlatforms]);
   const [activePlatform, setActivePlatform] = useState<PlatformItem | null>(null);
+  
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -311,28 +370,30 @@ export default function Platforms({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">管理平台</h2>
-        <div className="flex items-center gap-2">
-          
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Title level={2} style={{ margin: 0 }}>
+          管理平台
+        </Title>
+        <Space>
           {/* 排序按钮 */}
           <Button
+            icon={<SortAscendingOutlined />}
             onClick={toggleSorting}
-            variant={isSorting ? "default" : "outline"}
-            className={isSorting ? "bg-amber-600 hover:bg-amber-700" : ""}
+            type={isSorting ? "primary" : "default"}
+            style={isSorting ? { backgroundColor: token.colorWarning } : {}}
           >
-            <ArrowDownWideNarrow className="h-4 w-4 mr-2" />
             {isSorting ? "取消排序" : "排序"}
           </Button>
           
           {/* 确认排序按钮 */}
           {isSorting && (
             <Button
+              icon={<CheckOutlined />}
               onClick={saveSortOrder}
-              className="bg-green-600 hover:bg-green-700"
+              type="primary"
+              style={{ backgroundColor: token.colorSuccess, borderColor: token.colorSuccess }}
             >
-              <Check className="h-4 w-4 mr-2" />
               确认排序
             </Button>
           )}
@@ -340,14 +401,14 @@ export default function Platforms({
           {/* 新增平台按钮 */}
           {!isSorting && (
             <Button
+              icon={<PlusOutlined />}
               onClick={() => onAddNew?.("platform")}
-              className="bg-blue-600 hover:bg-blue-700"
+              type="primary"
             >
-              <Plus className="h-4 w-4 mr-2" />
               新增平台
             </Button>
           )}
-        </div>
+        </Space>
       </div>
 
       {isSorting ? (
@@ -366,7 +427,11 @@ export default function Platforms({
             items={sortedItems.map(item => item.id)}
             strategy={rectSortingStrategy}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: 24
+            }}>
               {sortedItems.map((platform) => (
                 <SortablePlatformItem 
                   key={platform.id}
@@ -383,69 +448,100 @@ export default function Platforms({
           </DragOverlay>
         </DndContext>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gap: 24
+        }}>
           {managementPlatforms.map((platform) => {
             const Icon = getIconByName(platform.iconName);
+            const platformColor = getColorByValue(platform.color);
+            const [isHovered, setIsHovered] = useState(false);
+            
             return (
-              <div key={platform.id} className="gradient-border">
-                <Card className="bg-white group h-48">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+              <div 
+                key={platform.id} 
+                className="gradient-border"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+              >
+                <Card
+                  hoverable
+                  style={{
+                    backgroundColor: 'white',
+                    height: 192
+                  }}
+                  styles={{
+                    body: { padding: 0 },
+                    header: { padding: '16px 20px', borderBottom: 'none' }
+                  }}
+                  title={
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Space align="center">
                         <div
-                          className={`w-12 h-12 ${platform.color} rounded-lg flex items-center justify-center`}
+                          style={{
+                            width: 48,
+                            height: 48,
+                            background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)`,
+                            borderRadius: token.borderRadiusLG,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
                         >
                           <Icon className="h-6 w-6 text-white" />
                         </div>
-                        <div>
-                          <CardTitle className="group-hover:text-blue-600">
-                            {platform.name}
-                          </CardTitle>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
+                          {platform.name}
+                        </Title>
+                      </Space>
+                      <Space 
+                        size="small" 
+                        style={{ 
+                          opacity: isHovered ? 1 : 0,
+                          transition: 'opacity 0.2s ease-in-out'
+                        }}
+                      >
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          type="text"
+                          size="small"
+                          icon={<EditOutlined />}
                           onClick={(e) => {
                             e.stopPropagation();
                             onEdit?.(platform, "platform");
                           }}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        />
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          type="text"
+                          size="small"
+                          danger
+                          icon={<DeleteOutlined />}
                           onClick={(e) => {
                             e.stopPropagation();
                             onDelete?.(platform.id, "platform");
                           }}
-                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                        />
+                      </Space>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="min-h-[20px]">
+                  }
+                >
+                  <div style={{ padding: '0 20px 20px' }}>
+                    <div style={{ minHeight: 20, marginBottom: 16 }}>
                       {platform.description && (
-                        <p className="text-gray-600 text-sm truncate" title={platform.description}>
+                        <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={platform.description}>
                           {platform.description}
-                        </p>
+                        </Text>
                       )}
                     </div>
                     <Button
-                      className="w-full bg-transparent"
-                      variant="outline"
+                      block
+                      type="default"
+                      icon={<ExportOutlined />}
                       onClick={() => openPlatform(platform.url, platform.urlType)}
                     >
-                      <ExternalLink className="h-4 w-4 mr-2" />
                       访问平台
                     </Button>
-                  </CardContent>
+                  </div>
                 </Card>
               </div>
             );

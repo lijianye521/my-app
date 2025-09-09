@@ -248,10 +248,12 @@ export default function FormDialog({
                         flexDirection: 'column',
                         alignItems: 'center',
                         gap: 4,
+                        // 统一使用2px边框，只改变颜色，不改变粗细
                         border: selectedIcon === option.value 
                           ? `2px solid ${token.colorPrimary}` 
-                          : `1px solid ${token.colorBorderSecondary}`,
-                        backgroundColor: 'transparent'
+                          : `2px solid transparent`,
+                        backgroundColor: 'transparent',
+                        boxSizing: 'border-box'
                       }}
                   >
                     <LucideIconWrapper 
