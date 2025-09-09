@@ -339,6 +339,8 @@ export const colorOptions: ColorOption[] = [
 
 // URL类型选项
 export const urlTypeOptions: UrlTypeOption[] = [
+  // { 
+  //   value: "internal_terminal", 
 
   { 
     value: "internal", 
