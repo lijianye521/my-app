@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import toast from "react-hot-toast";
 import Link from "next/link";
 
 export default function ResetPasswordPage() {
@@ -16,36 +16,24 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
+  // 已经导入toast，不需要useToast hook
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // 表单验证
     if (!username || !email || !newPassword || !confirmPassword) {
-      toast({
-        title: "错误",
-        description: "请填写所有字段",
-        type: "destructive",
-      });
+      toast.error("请填写所有字段");
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      toast({
-        title: "错误",
-        description: "两次输入的密码不一致",
-        type: "destructive",
-      });
+      toast.error("两次输入的密码不一致");
       return;
     }
     
     if (newPassword.length < 6) {
-      toast({
-        title: "错误",
-        description: "密码长度至少为6位",
-        type: "destructive",
-      });
+      toast.error("密码长度至少为6位");
       return;
     }
     
@@ -70,11 +58,7 @@ export default function ResetPasswordPage() {
         throw new Error(data.message || "密码重置失败");
       }
       
-      toast({
-        title: "密码重置成功",
-        description: "请使用新密码登录",
-        type: "success",
-      });
+      toast.success("密码重置成功，请使用新密码登录");
       
       // 清空表单
       setUsername("");
@@ -88,11 +72,7 @@ export default function ResetPasswordPage() {
       }, 2000);
       
     } catch (error: any) {
-      toast({
-        title: "重置失败",
-        description: error.message || "请稍后重试",
-        type: "destructive",
-      });
+      toast.error(error.message || "重置失败，请稍后重试");
     } finally {
       setLoading(false);
     }

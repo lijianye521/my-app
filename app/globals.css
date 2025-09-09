@@ -204,4 +204,40 @@
    opacity: 1;
    animation: borderAnimation 3s ease infinite;
  }
+
+/* 完善Ant Design组件样式 */
+
+/* 优化Input样式 */
+.ant-input {
+  border-radius: 8px;
+}
+
+.ant-input:focus,
+.ant-input-focused {
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.1);
+}
+
+/* 优化Select样式 */
+.ant-select-selector {
+  border-radius: 8px !important;
+}
+
+.ant-select-focused .ant-select-selector {
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.1) !important;
+}
+
+/* 优化Card样式 */
+.ant-card {
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.ant-card:hover {
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* 优化Tag样式 */
+.ant-tag {
+  border-radius: 6px;
+}
  

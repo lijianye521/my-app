@@ -167,7 +167,7 @@ export default function Dashboard({
                   className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer group"
                   onClick={() => openItem(service.url, service.urlType)}
                 >
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <div className={`w-10 h-10 ${service.color} rounded-lg flex items-center justify-center`}>
                     <Icon className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1">

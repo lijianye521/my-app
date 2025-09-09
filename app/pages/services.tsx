@@ -79,7 +79,7 @@ function ServiceCard({ service }: { service: ServiceItem }) {
               <div className="mr-1 text-gray-400">
                 <GripVertical className="h-5 w-5" />
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className={`w-12 h-12 ${service.color} rounded-lg flex items-center justify-center`}>
                 <Icon className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -145,7 +145,7 @@ function SortableServiceItem({ service, isSorting, onEdit, onDelete }: SortableS
                   <GripVertical className="h-5 w-5" />
                 </div>
               )}
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className={`w-12 h-12 ${service.color} rounded-lg flex items-center justify-center`}>
                 <Icon className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -377,7 +377,7 @@ export default function Services({
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <div className={`w-12 h-12 ${service.color} rounded-lg flex items-center justify-center`}>
                           <Icon className="h-6 w-6 text-white" />
                         </div>
                         <div>

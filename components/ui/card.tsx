@@ -1,92 +1,81 @@
-import * as React from "react"
+import React from "react";
+import { Card as AntCard, CardProps as AntCardProps } from "antd";
 
-import { cn } from "@/lib/utils"
+const { Meta } = AntCard;
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card"
-      className={cn(
-        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
-        className
-      )}
-      {...props}
-    />
-  )
+interface CardProps extends AntCardProps {
+  // 保持与原有API兼容
 }
 
-function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+function Card({ className, children, ...props }: CardProps) {
   return (
-    <div
-      data-slot="card-header"
-      className={cn(
-        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
-        className
-      )}
+    <AntCard
+      className={className}
       {...props}
-    />
-  )
+    >
+      {children}
+    </AntCard>
+  );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+// Card子组件
+function CardHeader({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="card-title"
-      className={cn("leading-none font-semibold", className)}
-      {...props}
-    />
-  )
+    <div className={`card-header ${className || ''}`} {...props}>
+      {children}
+    </div>
+  );
 }
 
-function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+function CardTitle({ className, children, ...props }: React.ComponentProps<"h3">) {
   return (
-    <div
-      data-slot="card-description"
-      className={cn("text-muted-foreground text-sm", className)}
-      {...props}
-    />
-  )
+    <h3 className={`card-title font-semibold text-lg ${className || ''}`} {...props}>
+      {children}
+    </h3>
+  );
 }
 
-function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+function CardDescription({ className, children, ...props }: React.ComponentProps<"p">) {
   return (
-    <div
-      data-slot="card-action"
-      className={cn(
-        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className
-      )}
-      {...props}
-    />
-  )
+    <p className={`card-description text-gray-600 text-sm ${className || ''}`} {...props}>
+      {children}
+    </p>
+  );
 }
 
-function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+function CardContent({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="card-content"
-      className={cn("px-6", className)}
-      {...props}
-    />
-  )
+    <div className={`card-content ${className || ''}`} {...props}>
+      {children}
+    </div>
+  );
 }
 
-function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+function CardFooter({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="card-footer"
-      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
-      {...props}
-    />
-  )
+    <div className={`card-footer flex items-center justify-between mt-4 ${className || ''}`} {...props}>
+      {children}
+    </div>
+  );
 }
 
-export {
-  Card,
-  CardHeader,
+// 为了向后兼容保留CardAction
+function CardAction({ className, children, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div className={`card-action ${className || ''}`} {...props}>
+      {children}
+    </div>
+  );
+}
+
+export { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardContent, 
   CardFooter,
-  CardTitle,
   CardAction,
-  CardDescription,
-  CardContent,
-}
+  Meta as CardMeta
+};
+export type { CardProps };

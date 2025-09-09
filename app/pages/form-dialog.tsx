@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, Option } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -170,26 +171,20 @@ export default function FormDialog({
 
           <div className="space-y-2">
             <Label htmlFor="urlType">链接类型 *</Label>
-            <select
-              id="urlType"
+            <Select
               value={formData.urlType}
-              onChange={(e) =>
-                setFormData({ ...formData, urlType: e.target.value as UrlType })
+              onChange={(value: UrlType) =>
+                setFormData({ ...formData, urlType: value })
               }
-              className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: 'right 0.5rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.5em 1.5em',
-              }}
+              className="w-full"
+              placeholder="请选择链接类型"
             >
               {urlTypeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
+                <Option key={option.value} value={option.value}>
                   {option.label} - {option.description}
-                </option>
+                </Option>
               ))}
-            </select>
+            </Select>
           </div>
 
           <div className="space-y-2">
