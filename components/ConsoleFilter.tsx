@@ -4,35 +4,59 @@ import { useEffect } from 'react';
 
 export default function ConsoleFilter() {
   useEffect(() => {
-    // 保存原始的console.warn
+    // 保存原始的console方法
     const originalWarn = console.warn;
+    const originalError = console.error;
     
-    // 重写console.warn来过滤特定警告
-    console.warn = (...args) => {
-      const message = args.join(' ');
+    // 定义需要过滤的警告/错误模式
+    const filterPatterns = [
+      // Ant Design 相关警告
+      '[antd: compatible] antd v5 support React is 16 ~ 18',
+      'bodyStyle is deprecated, please use styles instead',
       
-      // 过滤掉Ant Design兼容性警告
-      if (message.includes('[antd: compatible] antd v5 support React is 16 ~ 18')) {
-        return;
-      }
+      // Form 相关警告
+      'Instance created by `useForm` is not connected to any Form element',
+      'Forget to pass `form` prop',
       
-      // 过滤掉bodyStyle废弃警告
-      if (message.includes('bodyStyle is deprecated, please use styles instead')) {
-        return;
-      }
+      // React 开发相关警告
+      'There may be circular references',
+      'Warning: Instance created by',
       
-      // 过滤掉Form实例连接警告
-      if (message.includes('Instance created by `useForm` is not connected to any Form element')) {
-        return;
-      }
-      
-      // 其他警告正常显示
-      originalWarn.apply(console, args);
+      // 其他开发时的噪音
+      'at createUnhandledError',
+      'at handleClientError',
+      'at warning',
+      'at warningOnce',
+      'node_modules_rc-field-form',
+      'node_modules_next_dist_client',
+      'node_modules_fb3195ef'
+    ];
+    
+    // 检查消息是否应该被过滤
+    const shouldFilter = (message: string) => {
+      return filterPatterns.some(pattern => message.includes(pattern));
     };
     
-    // 清理函数：组件卸载时恢复原始console.warn
+    // 重写console.warn
+    console.warn = (...args) => {
+      const message = args.join(' ');
+      if (!shouldFilter(message)) {
+        originalWarn.apply(console, args);
+      }
+    };
+    
+    // 重写console.error来过滤开发时的噪音错误
+    console.error = (...args) => {
+      const message = args.join(' ');
+      if (!shouldFilter(message)) {
+        originalError.apply(console, args);
+      }
+    };
+    
+    // 清理函数：组件卸载时恢复原始console方法
     return () => {
       console.warn = originalWarn;
+      console.error = originalError;
     };
   }, []);
   
