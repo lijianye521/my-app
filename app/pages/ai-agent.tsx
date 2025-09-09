@@ -6,7 +6,7 @@ import { Sparkles, Brain, Zap } from 'lucide-react';
 
 export default function AIAgent() {
 
-  // 特性项组件
+  // 特性项组件123
   const FeatureItem = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
     <div className="flex items-start p-4 bg-indigo-50 rounded-lg">
       <div className="mr-4 bg-indigo-100 p-3 rounded-full">
