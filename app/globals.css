@@ -160,7 +160,7 @@
  .gradient-border {
  position: relative;
  padding: 2px; /* 为彩带边框留出空间 */
- border-radius: 1rem; /* 与Card组件的圆角保持一致 */
+ border-radius: 12px; /* 与Ant Design Card组件的圆角保持一致 */
  background-color: transparent; /* 确保背景透明 */
  display: block;
 }

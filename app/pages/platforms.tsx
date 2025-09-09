@@ -71,7 +71,7 @@ function PlatformCard({ platform }: { platform: PlatformItem }) {
   
   return (
     <div className="gradient-border">
-      <Card className="bg-white group">
+      <Card className="bg-white group h-48">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -92,10 +92,16 @@ function PlatformCard({ platform }: { platform: PlatformItem }) {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-4">{platform.description}</p>
+        <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
+          <div className="flex-1">
+            {platform.description && (
+              <p className="text-gray-600 mb-4 truncate" title={platform.description}>
+                {platform.description}
+              </p>
+            )}
+          </div>
           <Button
-            className="w-full bg-transparent"
+            className="w-full bg-transparent mt-auto"
             variant="outline"
             disabled
           >
@@ -138,7 +144,7 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
   
   return (
     <div ref={setNodeRef} style={style} className="gradient-border touch-none" {...attributes} {...listeners}>
-      <Card className={`bg-white group ${isDragging ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}>
+      <Card className={`bg-white group h-48 ${isDragging ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -186,10 +192,16 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
             )}
           </div>
         </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-4">{platform.description}</p>
+        <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
+          <div className="flex-1">
+            {platform.description && (
+              <p className="text-gray-600 mb-4 truncate" title={platform.description}>
+                {platform.description}
+              </p>
+            )}
+          </div>
           <Button
-            className="w-full bg-transparent"
+            className="w-full bg-transparent mt-auto"
             variant="outline"
             onClick={() => openPlatform(platform.url, platform.urlType)}
             disabled={isSorting}
@@ -303,7 +315,6 @@ export default function Platforms({
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">管理平台</h2>
         <div className="flex items-center gap-2">
-          <Badge variant="secondary">{managementPlatforms.length}个平台</Badge>
           
           {/* 排序按钮 */}
           <Button
@@ -377,7 +388,7 @@ export default function Platforms({
             const Icon = getIconByName(platform.iconName);
             return (
               <div key={platform.id} className="gradient-border">
-                <Card className="bg-white group">
+                <Card className="bg-white group h-48">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -418,10 +429,16 @@ export default function Platforms({
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-4">{platform.description}</p>
+                  <CardContent className="flex flex-col justify-between" style={{ minHeight: '120px' }}>
+                    <div className="flex-1">
+                      {platform.description && (
+                        <p className="text-gray-600 mb-4 truncate" title={platform.description}>
+                          {platform.description}
+                        </p>
+                      )}
+                    </div>
                     <Button
-                      className="w-full bg-transparent"
+                      className="w-full bg-transparent mt-auto"
                       variant="outline"
                       onClick={() => openPlatform(platform.url, platform.urlType)}
                     >

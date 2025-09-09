@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Menu } from "antd";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -269,8 +270,8 @@ export default function EnterpriseStockToolboxClient({
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-6 border-b border-gray-200">
+      <div className="w-52 bg-white border-r border-gray-200 flex flex-col">
+        <div className="px-3 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ 
               background: '#2563eb', /* 兜底纯色 */
@@ -287,23 +288,19 @@ export default function EnterpriseStockToolboxClient({
           </div>
         </div>
 
-        <nav className="flex-1 p-4">
-          <div className="space-y-2">
-            {filteredMenuItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Button
-                  key={item.id}
-                  variant={activeSection === item.id ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => setActiveSection(item.id)}
-                >
-                  <Icon className="mr-3 h-4 w-4" />
-                  {item.label}
-                </Button>
-              );
-            })}
-          </div>
+        <nav className="flex-1">
+          <Menu
+            mode="inline"
+            selectedKeys={[activeSection]}
+            style={{ border: 'none' }}
+            className="h-full"
+            items={filteredMenuItems.map((item) => ({
+              key: item.id,
+              icon: <item.icon className="h-4 w-4" />,
+              label: item.label,
+              onClick: () => setActiveSection(item.id)
+            }))}
+          />
         </nav>
       </div>
 
