@@ -2,12 +2,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  MessageSquare,
-  ExternalLink,
-  Settings,
-  Database,
-  TrendingUp,
-} from "lucide-react";
+  MessageOutlined,
+  ExportOutlined,
+  SettingOutlined,
+  DatabaseOutlined,
+  RiseOutlined,
+} from "@ant-design/icons";
 import { PageProps } from "./types";
 import { iconOptions } from "./data";
 
@@ -60,7 +60,7 @@ export default function Dashboard({
             onClick={handleForumClick}
           >
             <CardContent className="h-full flex flex-col items-center justify-center text-white p-6 relative">
-              <MessageSquare className="h-14 w-14 mb-3" />
+              <MessageOutlined style={{ fontSize: '56px' }} className="mb-3" />
               <h2 className="text-2xl font-bold mb-2">技术论坛</h2>
               <p className="text-base text-center mb-4 text-blue-100 max-w-sm">
                 新员工学习交流平台，技术分享与问题讨论
@@ -75,7 +75,7 @@ export default function Dashboard({
                     handleForumClick();
                   }}
                 >
-                  <ExternalLink className="h-4 w-4 mr-2" />
+                    <ExportOutlined style={{ fontSize: '16px' }} className="mr-2" />
                   访问论坛
                 </Button>
               </div>
@@ -89,7 +89,7 @@ export default function Dashboard({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
-                    <Settings className="h-6 w-6 text-white" />
+                    <SettingOutlined style={{ fontSize: '24px' }} className="text-white" />
                   </div>
                   <div>
                     <div className="font-bold text-lg text-gray-800">管理平台</div>
@@ -111,7 +111,7 @@ export default function Dashboard({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
-                    <Database className="h-6 w-6 text-white" />
+                    <DatabaseOutlined style={{ fontSize: '24px' }} className="text-white" />
                   </div>
                   <div>
                     <div className="font-bold text-lg text-gray-800">技术服务</div>
@@ -134,7 +134,7 @@ export default function Dashboard({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-blue-500" />
+            <RiseOutlined style={{ fontSize: '20px' }} className="text-blue-500" />
             常用管理平台
           </CardTitle>
         </CardHeader>
@@ -158,7 +158,7 @@ export default function Dashboard({
                       {platform.name}
                     </div>
                   </div>
-                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600" />
+                  <ExportOutlined style={{ fontSize: '16px' }} className="text-gray-400 group-hover:text-blue-600" />
                 </div>
               );
             })}
@@ -170,7 +170,7 @@ export default function Dashboard({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Database className="h-5 w-5 text-green-500" />
+            <DatabaseOutlined style={{ fontSize: '20px' }} className="text-green-500" />
             技术服务
           </CardTitle>
         </CardHeader>
@@ -195,7 +195,7 @@ export default function Dashboard({
                       {service.description}
                     </div>
                   </div>
-                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600" />
+                  <ExportOutlined style={{ fontSize: '16px' }} className="text-gray-400 group-hover:text-blue-600" />
                 </div>
               );
             })}
