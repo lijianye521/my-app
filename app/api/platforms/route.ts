@@ -6,7 +6,7 @@ import { OperationLogService } from "@/lib/operation-log-service";
 
 export async function GET() {
   try {
-    // 检查用户是否已登录
+    // 检查用户是否已登录123
     const session = await getServerSession(authOptions);
     
     if (!session) {
