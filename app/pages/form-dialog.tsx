@@ -27,7 +27,15 @@ interface LucideIconWrapperProps {
 const LucideIconWrapper = forwardRef<unknown, LucideIconWrapperProps>(
   ({ icon: Icon, style, ...props }, ref) => {
     // 传递必要的属性并保持ref引用
-    return Icon ? <Icon ref={ref} {...props} size={style?.fontSize || 16} color={style?.color} /> : null;
+    return Icon ? (
+      <Icon 
+        ref={ref} 
+        {...props} 
+        size={style?.fontSize || 16} 
+        color={style?.color || 'currentColor'}
+        style={{ color: style?.color || 'currentColor', ...style }}
+      />
+    ) : null;
   }
 );
 
