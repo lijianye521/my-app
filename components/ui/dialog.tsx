@@ -84,21 +84,6 @@ function DialogContent({
       footer={null}
       className={className}
       closable={showCloseButton}
-      centered={true} // 居中显示
-      width="auto" // 自适应宽度
-      styles={{
-        body: {
-          padding: '24px', // 确保内容区域有足够的padding
-        },
-        header: {
-          padding: '16px 24px', // 头部padding
-          borderBottom: '1px solid #f0f0f0',
-        },
-        footer: {
-          padding: '16px 24px', // 底部padding
-          borderTop: '1px solid #f0f0f0',
-        }
-      }}
       {...props}
     >
       {children}

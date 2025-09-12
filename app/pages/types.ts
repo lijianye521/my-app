@@ -3,7 +3,7 @@ import { LucideProps } from "lucide-react";
 // 图标选项接口
 export interface IconOption {
   value: string;
-  icon: React.ComponentType<LucideProps>;
+  icon: React.ComponentType<any>;
   label: string;
 }
 
@@ -78,7 +78,7 @@ export interface FormDataType {
 export interface MenuItem {
   id: string;
   label: string;
-  icon: React.ComponentType<LucideProps>;
+  icon: React.ComponentType<any>;
 }
 
 // 页面组件属性接口

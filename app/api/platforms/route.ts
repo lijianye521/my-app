@@ -6,7 +6,7 @@ import { OperationLogService } from "@/lib/operation-log-service";
 
 export async function GET() {
   try {
-    // 检查用户是否已登录123
+    // 检查用户是否已登录
     const session = await getServerSession(authOptions);
     
     if (!session) {
@@ -26,6 +26,11 @@ export async function GET() {
     // 获取服务数据
     const [serviceRows] = await db.query(
       "SELECT * FROM platform_services WHERE service_type = 'service' ORDER BY sort_order"
+    );
+
+    // 获取Agent数据
+    const [agentRows] = await db.query(
+      "SELECT * FROM platform_services WHERE service_type = 'agent' ORDER BY sort_order"
     );
 
     // 转换数据格式
@@ -51,10 +56,22 @@ export async function GET() {
       urlType: item.url_type,
       otherInformation: item.other_information,
     }));
+
+    const agents = (agentRows as any[]).map((item) => ({
+      id: item.service_code,
+      name: item.service_name,
+      description: item.service_description,
+      iconName: item.icon_name,
+      url: item.service_url,
+      color: item.color_class,
+      urlType: item.url_type,
+      otherInformation: item.other_information,
+    }));
     
     return NextResponse.json({
       platforms,
-      services
+      services,
+      agents
     });
   } catch (error) {
     console.error("获取平台和服务数据失败:", error);
@@ -310,7 +327,7 @@ export async function DELETE(request: Request) {
 }
 
 // 从db.ts导入此函数
-async function updatePlatformServiceOrder(items: {id: string, sortOrder: number}[], type: 'platform' | 'service') {
+async function updatePlatformServiceOrder(items: {id: string, sortOrder: number}[], type: 'platform' | 'service' | 'agent') {
   const db = await getDb();
   
   try {

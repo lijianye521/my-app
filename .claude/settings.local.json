@@ -3,9 +3,14 @@
     "allow": [
       "WebSearch",
       "WebFetch(domain:ant.design)",
-      "Bash(git log:*)",
-      "Bash(npm run dev:*)",
-      "Bash(sed:*)"
+      "Read(//c/xampp/phpMyAdmin/**)",
+      "Read(//c/xampp/mysql/bin/**)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql\" -u root -e \"SELECT user, host FROM mysql.user;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql\" -h 127.0.0.1 -u root -e \"SELECT user, host FROM mysql.user;\")",
+      "Bash(taskkill:*)",
+      "Bash(mysqld:*)",
+      "Bash(timeout:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

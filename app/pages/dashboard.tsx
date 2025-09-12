@@ -1,13 +1,12 @@
 // 首页
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, Button, Space, Typography, theme } from "antd";
 import {
-  MessageSquare,
-  ExternalLink,
-  Settings,
-  Database,
-  TrendingUp,
-} from "lucide-react";
+  MessageOutlined,
+  ExportOutlined,
+  SettingOutlined,
+  DatabaseOutlined,
+  RiseOutlined,
+} from "@ant-design/icons";
 import { PageProps } from "./types";
 import { iconOptions } from "./data";
 
@@ -39,7 +38,11 @@ function openItem(url: string, urlType?: string) {
 export default function Dashboard({
   managementPlatforms,
   techServices,
-}: PageProps) {
+  onPageChange,
+}: PageProps & { onPageChange?: (page: string) => void }) {
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
+  
   const handleForumClick = () => {
     window.open("http://10.106.19.29:8090/", "_blank");
   };
@@ -56,89 +59,177 @@ export default function Dashboard({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card
-            className="h-64 cursor-pointer hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 border-none"
+            hoverable
             onClick={handleForumClick}
+            style={{
+              height: 256,
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6, #4f46e5)',
+              border: 'none',
+              borderRadius: token.borderRadiusLG,
+              color: 'white'
+            }}
+            styles={{
+              body: {
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 24,
+                position: 'relative'
+              }
+            }}
           >
-            <CardContent className="h-full flex flex-col items-center justify-center text-white p-6 relative">
-              <MessageSquare className="h-14 w-14 mb-3" />
-              <h2 className="text-2xl font-bold mb-2">技术论坛</h2>
-              <p className="text-base text-center mb-4 text-blue-100 max-w-sm">
+            <Space direction="vertical" align="center" size="middle" style={{ textAlign: 'center' }}>
+              <MessageOutlined style={{ fontSize: 56, color: 'white', marginBottom: 8 }} />
+              <Title level={2} style={{ color: 'white', margin: 0 }}>
+                技术论坛
+              </Title>
+              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, maxWidth: 280, lineHeight: 1.5 }}>
                 新员工学习交流平台，技术分享与问题讨论
-              </p>
-              <div className="flex justify-center w-full">
-                <Button
-                  size="default"
-                  variant="outline" 
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 transition-all duration-200"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleForumClick();
-                  }}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  访问论坛
-                </Button>
-              </div>
-            </CardContent>
+              </Text>
+              <Button
+                type="default"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  color: 'white',
+                  backdropFilter: 'blur(4px)'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleForumClick();
+                }}
+                icon={<ExportOutlined />}
+              >
+                访问论坛
+              </Button>
+            </Space>
           </Card>
         </div>
 
-        <div className="space-y-4">
-          <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-blue-200">
-            <CardContent className="p-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
-                    <Settings className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-lg text-gray-800">管理平台</div>
-                    <div className="text-sm text-blue-600 font-medium">
-                      管理平台集
-                    </div>
-                  </div>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'center', 
+          height: '100%',
+          gap: 16
+        }}>
+          <Card 
+            hoverable
+            style={{ 
+              borderRadius: token.borderRadiusLG,
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
+            }}
+            styles={{
+              body: { padding: '16px 20px' }
+            }}
+            onClick={() => onPageChange?.('platforms')}
+          >
+            <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+              <Space align="center" size="middle">
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  background: `linear-gradient(135deg, ${token.colorPrimary}, ${token.colorPrimaryActive})`,
+                  borderRadius: token.borderRadiusLG,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: token.boxShadowSecondary
+                }}>
+                  <SettingOutlined style={{ fontSize: 24, color: 'white' }} />
                 </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-600">{managementPlatforms.length}</div>
-                  <div className="text-xs text-gray-500">个平台</div>
+                <div>
+                  <Title level={4} style={{ margin: 0, color: token.colorText }}>
+                    管理平台
+                  </Title>
+                  <Text type="secondary" style={{ fontSize: 14 }}>
+                    管理平台集
+                  </Text>
                 </div>
+              </Space>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ 
+                  fontSize: 28, 
+                  fontWeight: 'bold', 
+                  color: token.colorPrimary,
+                  lineHeight: 1
+                }}>
+                  {managementPlatforms.length}
+                </div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  个平台
+                </Text>
               </div>
-            </CardContent>
+            </Space>
           </Card>
 
-          <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-green-200">
-            <CardContent className="p-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
-                    <Database className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-lg text-gray-800">技术服务</div>
-                    <div className="text-sm text-green-600 font-medium">
-                      提供技术服务
-                    </div>
-                  </div>
+          <Card 
+            hoverable
+            style={{ 
+              borderRadius: token.borderRadiusLG,
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
+            }}
+            styles={{
+              body: { padding: '16px 20px' }
+            }}
+            onClick={() => onPageChange?.('services')}
+          >
+            <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+              <Space align="center" size="middle">
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  background: `linear-gradient(135deg, ${token.colorSuccess}, ${token.colorSuccessActive})`,
+                  borderRadius: token.borderRadiusLG,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: token.boxShadowSecondary
+                }}>
+                  <DatabaseOutlined style={{ fontSize: 24, color: 'white' }} />
                 </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-green-600">{techServices.length}</div>
-                  <div className="text-xs text-gray-500">个服务</div>
+                <div>
+                  <Title level={4} style={{ margin: 0, color: token.colorText }}>
+                    技术服务
+                  </Title>
+                  <Text type="secondary" style={{ fontSize: 14 }}>
+                    提供技术服务
+                  </Text>
                 </div>
+              </Space>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ 
+                  fontSize: 28, 
+                  fontWeight: 'bold', 
+                  color: token.colorSuccess,
+                  lineHeight: 1
+                }}>
+                  {techServices.length}
+                </div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  个服务
+                </Text>
               </div>
-            </CardContent>
+            </Space>
           </Card>
         </div>
       </div>
 
       {/* 常用管理平台 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-blue-500" />
-            常用管理平台
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card
+        title={
+          <Space align="center">
+            <RiseOutlined style={{ fontSize: 20, color: token.colorPrimary }} />
+            <Title level={4} style={{ margin: 0 }}>常用管理平台</Title>
+          </Space>
+        }
+        style={{ borderRadius: token.borderRadiusLG }}
+      >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {managementPlatforms.map((platform) => {
               const Icon = getIconByName(platform.iconName);
@@ -158,23 +249,23 @@ export default function Dashboard({
                       {platform.name}
                     </div>
                   </div>
-                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600" />
+                  <ExportOutlined style={{ fontSize: '16px' }} className="text-gray-400 group-hover:text-blue-600" />
                 </div>
               );
             })}
           </div>
-        </CardContent>
       </Card>
 
       {/* 技术服务 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Database className="h-5 w-5 text-green-500" />
-            技术服务
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card
+        title={
+          <Space align="center">
+            <DatabaseOutlined style={{ fontSize: 20, color: token.colorSuccess }} />
+            <Title level={4} style={{ margin: 0 }}>技术服务</Title>
+          </Space>
+        }
+        style={{ borderRadius: token.borderRadiusLG }}
+      >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {techServices.map((service) => {
               const Icon = getIconByName(service.iconName);
@@ -195,12 +286,11 @@ export default function Dashboard({
                       {service.description}
                     </div>
                   </div>
-                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600" />
+                  <ExportOutlined style={{ fontSize: '16px' }} className="text-gray-400 group-hover:text-blue-600" />
                 </div>
               );
             })}
           </div>
-        </CardContent>
       </Card>
     </div>
   );

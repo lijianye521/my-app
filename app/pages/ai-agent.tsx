@@ -1,50 +1,113 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, Brain, Zap } from 'lucide-react';
+import { Card, Typography, Space, theme } from 'antd';
+import { StarOutlined, BulbOutlined, ThunderboltOutlined } from '@ant-design/icons';
 
 export default function AIAgent() {
+  const { token } = theme.useToken();
+  const { Title, Text, Paragraph } = Typography;
 
-  // 特性项组件123
+  // 特性项组件
   const FeatureItem = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
-    <div className="flex items-start p-4 bg-indigo-50 rounded-lg">
-      <div className="mr-4 bg-indigo-100 p-3 rounded-full">
+    <div style={{
+      display: 'flex',
+      alignItems: 'flex-start',
+      padding: 16,
+      backgroundColor: token.colorBgContainer,
+      borderRadius: token.borderRadiusLG,
+      border: `1px solid ${token.colorBorderSecondary}`
+    }}>
+      <div style={{
+        marginRight: 16,
+        backgroundColor: token.colorPrimaryBg,
+        padding: 12,
+        borderRadius: '50%'
+      }}>
         {icon}
       </div>
       <div>
-        <h3 className="font-medium text-indigo-900">{title}</h3>
-        <p className="text-sm text-gray-600">{description}</p>
+        <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
+          {title}
+        </Title>
+        <Paragraph style={{ margin: 0, fontSize: 14, color: token.colorTextSecondary }}>
+          {description}
+        </Paragraph>
       </div>
     </div>
   );
 
   return (
-    <div className="space-y-6">
-      <Card className="w-full overflow-hidden border-none shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white">
-          <CardTitle className="text-2xl font-bold flex items-center">
-            <Sparkles className="mr-2 h-6 w-6" />
-            AI 智能助手
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-8">
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="mb-6 h-24 w-24 rounded-full bg-indigo-100 flex items-center justify-center">
-              <Brain className="h-12 w-12 text-indigo-600 animate-pulse" />
-            </div>
-                        <h2 className="mb-2 text-3xl font-bold text-gray-900">努力开发中</h2>
-            <div className="mb-8 py-4 px-8 bg-indigo-50 rounded-lg inline-block">
-              <p className="text-xl font-semibold text-indigo-800">
-                预计2025.9.12日前上线
-              </p>
-            </div>
-            
-
-            
-
+    <div style={{ padding: '24px 0' }}>
+      <Card
+        style={{
+          width: '100%',
+          overflow: 'hidden',
+          border: 'none',
+          boxShadow: token.boxShadowSecondary,
+        }}
+        styles={{
+          header: {
+            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+            color: 'white',
+            borderBottom: 'none'
+          },
+          body: { padding: '32px' }
+        }}
+        title={
+          <Space align="center">
+            <StarOutlined style={{ fontSize: 24 }} />
+            <Title level={2} style={{ margin: 0, color: 'white' }}>
+              AI 智能助手
+            </Title>
+          </Space>
+        }
+      >
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '32px 0',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            marginBottom: 24,
+            height: 96,
+            width: 96,
+            borderRadius: '50%',
+            backgroundColor: token.colorPrimaryBg,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <BulbOutlined 
+              style={{ 
+                fontSize: 48, 
+                color: token.colorPrimary,
+                animation: 'pulse 2s infinite'
+              }} 
+            />
           </div>
-        </CardContent>
+          <Title level={1} style={{ marginBottom: 8, color: token.colorText }}>
+            努力开发中
+          </Title>
+          <div style={{
+            marginBottom: 32,
+            padding: '16px 32px',
+            backgroundColor: token.colorPrimaryBg,
+            borderRadius: token.borderRadiusLG,
+            display: 'inline-block'
+          }}>
+            <Text style={{
+              fontSize: 20,
+              fontWeight: 600,
+              color: token.colorPrimary
+            }}>
+              预计2025.9.12日前上线
+            </Text>
+          </div>
+        </div>
       </Card>
     </div>
   );

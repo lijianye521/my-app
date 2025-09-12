@@ -1,11 +1,8 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Plus, ExternalLink, Edit, Trash2, GripVertical, Check, ArrowDownWideNarrow, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Button, Card, Tag, Typography, Space, theme, message } from "antd";
+import { PlusOutlined, ExportOutlined, EditOutlined, DeleteOutlined, MenuOutlined, CheckOutlined, SortAscendingOutlined } from "@ant-design/icons";
 import { PageProps, ServiceItem, PlatformItem } from "./types";
-import { iconOptions } from "./data";
-import toast from "react-hot-toast";
+import { iconOptions, colorOptions } from "./data";
 import {
   DndContext,
   closestCenter,
@@ -46,6 +43,13 @@ const getIconByName = (iconName: string) => {
   return iconOption ? iconOption.icon : iconOptions[0].icon;
 };
 
+// 获取颜色值
+const getColorByValue = (colorValue: string | undefined) => {
+  if (!colorValue) return '#10b981';
+  const colorOption = colorOptions.find((option) => option.value === colorValue);
+  return colorOption ? colorOption.color : '#10b981';
+};
+
 // 访问服务的函数 - 根据URL类型选择打开方式
 function openService(url: string, urlType?: string) {
   console.log("openService", { url, urlType });
@@ -68,45 +72,64 @@ function openService(url: string, urlType?: string) {
 // 服务卡片组件 - 用于拖拽覆盖层
 function ServiceCard({ service }: { service: ServiceItem }) {
   const Icon = getIconByName(service.iconName);
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
+  const serviceColor = getColorByValue(service.color);
   
   return (
-    <div className="gradient-border">
-      <Card className="bg-white group h-48">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {/* 添加GripVertical图标，在拖拽覆盖层中显示 */}
-              <div className="mr-1 text-gray-400">
-                <GripVertical className="h-5 w-5" />
-              </div>
-              <div className={`w-12 h-12 ${service.color} rounded-lg flex items-center justify-center`}>
-                <Icon className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <CardTitle className="group-hover:text-blue-600">
-                  {service.name}
-                </CardTitle>
-              </div>
+    <div style={{
+      background: `linear-gradient(45deg, ${token.colorPrimary}20, ${token.colorPrimaryBg})`,
+      padding: 2,
+      borderRadius: token.borderRadiusLG
+    }}>
+      <Card
+        style={{
+          backgroundColor: 'white',
+          height: 192,
+          borderRadius: token.borderRadiusLG
+        }}
+        styles={{
+          body: { padding: 0 },
+          header: { padding: '16px 20px', borderBottom: 'none' }
+        }}
+        title={
+          <Space align="center">
+            <MenuOutlined style={{ color: token.colorTextSecondary }} />
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                background: `linear-gradient(135deg, ${serviceColor}, ${serviceColor}cc)`,
+                borderRadius: token.borderRadiusLG,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Icon className="h-6 w-6 text-white" />
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="min-h-[20px]">
+            <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
+              {service.name}
+            </Title>
+          </Space>
+        }
+      >
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ minHeight: 20, marginBottom: 16 }}>
             {service.description && (
-              <p className="text-gray-600 text-sm truncate" title={service.description}>
+              <Text type="secondary" style={{ fontSize: 13 }} ellipsis>
                 {service.description}
-              </p>
+              </Text>
             )}
           </div>
           <Button
-            className="w-full bg-transparent"
-            variant="outline"
+            block
             disabled
+            icon={<ExportOutlined />}
           >
-            <ExternalLink className="h-4 w-4 mr-2" />
             访问服务
           </Button>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );
@@ -130,10 +153,15 @@ function SortableServiceItem({ service, isSorting, onEdit, onDelete }: SortableS
     isDragging
   } = useSortable({ id: service.id });
   
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
+  const [isHovered, setIsHovered] = useState(false);
+  const serviceColor = getColorByValue(service.color);
+  
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0 : 1,  // 原位置确实需要隐藏
+    opacity: isDragging ? 0 : 1,
     zIndex: isDragging ? 1 : 0,
     cursor: isSorting ? (isDragging ? 'grabbing' : 'grab') : 'default',
   };
@@ -141,71 +169,102 @@ function SortableServiceItem({ service, isSorting, onEdit, onDelete }: SortableS
   const Icon = getIconByName(service.iconName);
   
   return (
-    <div ref={setNodeRef} style={style} className="gradient-border touch-none" {...attributes} {...listeners}>
-      <Card className={`bg-white group h-48 ${isDragging ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...listeners}
+      className="gradient-border touch-none"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Card
+        hoverable={!isSorting}
+        style={{
+          backgroundColor: 'white',
+          height: 192,
+          ...(isDragging && { 
+            boxShadow: `0 0 0 2px ${token.colorPrimary}`,
+            transform: 'scale(1.02)' 
+          })
+        }}
+        styles={{
+          body: { padding: 0 },
+          header: { padding: '16px 20px', borderBottom: 'none' }
+        }}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Space align="center">
               {isSorting && (
-                <div className="mr-1 text-gray-400">
-                  <GripVertical className="h-5 w-5" />
-                </div>
+                <MenuOutlined style={{ color: token.colorTextSecondary }} />
               )}
-              <div className={`w-12 h-12 ${service.color} rounded-lg flex items-center justify-center`}>
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  background: `linear-gradient(135deg, ${serviceColor}, ${serviceColor}cc)`,
+                  borderRadius: token.borderRadiusLG,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
                 <Icon className="h-6 w-6 text-white" />
               </div>
-              <div>
-                <CardTitle className="group-hover:text-blue-600">
-                  {service.name}
-                </CardTitle>
-              </div>
-            </div>
+              <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
+                {service.name}
+              </Title>
+            </Space>
             {!isSorting && (
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Space 
+                size="small" 
+                style={{ 
+                  opacity: isHovered ? 1 : 0,
+                  transition: 'opacity 0.2s ease-in-out'
+                }}
+              >
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  type="text"
+                  size="small"
+                  icon={<EditOutlined />}
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit?.(service, "service");
                   }}
-                  className="h-8 w-8 p-0"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
+                />
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete?.(service.id, "service");
                   }}
-                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+                />
+              </Space>
             )}
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="min-h-[20px]">
+        }
+      >
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ minHeight: 20, marginBottom: 16 }}>
             {service.description && (
-              <p className="text-gray-600 text-sm truncate" title={service.description}>
+              <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={service.description}>
                 {service.description}
-              </p>
+              </Text>
             )}
           </div>
           <Button
-            className="w-full bg-transparent"
-            variant="outline"
+            block
+            type="default"
+            icon={<ExportOutlined />}
             onClick={() => openService(service.url, service.urlType)}
             disabled={isSorting}
           >
-            <ExternalLink className="h-4 w-4 mr-2" />
             访问服务
           </Button>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );
@@ -221,6 +280,9 @@ export default function Services({
   const [isSorting, setIsSorting] = useState(false);
   const [sortedItems, setSortedItems] = useState([...techServices]);
   const [activeService, setActiveService] = useState<ServiceItem | null>(null);
+  
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -290,45 +352,40 @@ export default function Services({
         // 更新前端状态
         setTechServices(sortedItems);
         setIsSorting(false);
-        toast.success('服务排序更新成功', {
-          icon: '👍',
-        });
+        message.success('服务排序更新成功');
       } else {
-        toast.error(result.message || '保存排序时发生错误', {
-          icon: '❌',
-        });
+        message.error(result.message || '保存排序时发生错误');
       }
     } catch (error) {
       console.error('更新排序失败:', error);
-      toast.error('更新排序过程中发生错误，请查看控制台', {
-        icon: '❌',
-      });
+      message.error('更新排序过程中发生错误，请查看控制台');
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">技术服务</h2>
-        <div className="flex items-center gap-2">
-          
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Title level={2} style={{ margin: 0 }}>
+          技术服务
+        </Title>
+        <Space>
           {/* 排序按钮 */}
           <Button
+            icon={<SortAscendingOutlined />}
             onClick={toggleSorting}
-            variant={isSorting ? "default" : "outline"}
-            className={isSorting ? "bg-amber-600 hover:bg-amber-700" : ""}
+            type={isSorting ? "primary" : "default"}
+            style={isSorting ? { backgroundColor: token.colorWarning } : {}}
           >
-            <ArrowDownWideNarrow className="h-4 w-4 mr-2" />
             {isSorting ? "取消排序" : "排序"}
           </Button>
           
           {/* 确认排序按钮 */}
           {isSorting && (
             <Button
+              icon={<CheckOutlined />}
               onClick={saveSortOrder}
-              className="bg-green-600 hover:bg-green-700"
+              type="primary"
             >
-              <Check className="h-4 w-4 mr-2" />
               确认排序
             </Button>
           )}
@@ -336,14 +393,14 @@ export default function Services({
           {/* 新增服务按钮 */}
           {!isSorting && (
             <Button
+              icon={<PlusOutlined />}
               onClick={() => onAddNew?.("service")}
-              className="bg-green-600 hover:bg-green-700"
+              type="primary"
             >
-              <Plus className="h-4 w-4 mr-2" />
               新增服务
             </Button>
           )}
-        </div>
+        </Space>
       </div>
 
       {isSorting ? (
@@ -362,7 +419,11 @@ export default function Services({
             items={sortedItems.map(item => item.id)}
             strategy={rectSortingStrategy}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: 24
+            }}>
               {sortedItems.map((service) => (
                 <SortableServiceItem 
                   key={service.id}
@@ -379,67 +440,100 @@ export default function Services({
           </DragOverlay>
         </DndContext>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gap: 24
+        }}>
           {techServices.map((service) => {
             const Icon = getIconByName(service.iconName);
+            const serviceColor = getColorByValue(service.color);
+            const [isHovered, setIsHovered] = useState(false);
+            
             return (
-              <div key={service.id} className="gradient-border">
-                <Card className="bg-white group h-48">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 ${service.color} rounded-lg flex items-center justify-center`}>
+              <div 
+                key={service.id} 
+                className="gradient-border"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+              >
+                <Card
+                  hoverable
+                  style={{
+                    backgroundColor: 'white',
+                    height: 192
+                  }}
+                  styles={{
+                    body: { padding: 0 },
+                    header: { padding: '16px 20px', borderBottom: 'none' }
+                  }}
+                  title={
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Space align="center">
+                        <div
+                          style={{
+                            width: 48,
+                            height: 48,
+                            background: `linear-gradient(135deg, ${serviceColor}, ${serviceColor}cc)`,
+                            borderRadius: token.borderRadiusLG,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
                           <Icon className="h-6 w-6 text-white" />
                         </div>
-                        <div>
-                          <CardTitle className="group-hover:text-blue-600">
-                            {service.name}
-                          </CardTitle>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
+                          {service.name}
+                        </Title>
+                      </Space>
+                      <Space 
+                        size="small" 
+                        style={{ 
+                          opacity: isHovered ? 1 : 0,
+                          transition: 'opacity 0.2s ease-in-out'
+                        }}
+                      >
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          type="text"
+                          size="small"
+                          icon={<EditOutlined />}
                           onClick={(e) => {
                             e.stopPropagation();
                             onEdit?.(service, "service");
                           }}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        />
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          type="text"
+                          size="small"
+                          danger
+                          icon={<DeleteOutlined />}
                           onClick={(e) => {
                             e.stopPropagation();
                             onDelete?.(service.id, "service");
                           }}
-                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                        />
+                      </Space>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="min-h-[20px]">
+                  }
+                >
+                  <div style={{ padding: '0 20px 20px' }}>
+                    <div style={{ minHeight: 20, marginBottom: 16 }}>
                       {service.description && (
-                        <p className="text-gray-600 text-sm truncate" title={service.description}>
+                        <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={service.description}>
                           {service.description}
-                        </p>
+                        </Text>
                       )}
                     </div>
                     <Button
-                      className="w-full bg-transparent"
-                      variant="outline"
+                      block
+                      type="default"
+                      icon={<ExportOutlined />}
                       onClick={() => openService(service.url, service.urlType)}
                     >
-                      <ExternalLink className="h-4 w-4 mr-2" />
                       访问服务
                     </Button>
-                  </CardContent>
+                  </div>
                 </Card>
               </div>
             );

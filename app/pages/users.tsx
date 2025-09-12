@@ -1,19 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { 
-  Users, UserCog, AlertCircle, CheckCircle2, Plus, Key, UserPlus, 
-  Trash2, AlertTriangle, CheckSquare, Square, X, Upload, Shield, User 
-} from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+  Card, Button, Tag, Typography, Space, Table, Checkbox, Modal, Input, 
+  Upload, Spin, Alert, Popconfirm, Form, message, theme, Divider
+} from "antd";
+import {
+  UserOutlined, UserAddOutlined, ExclamationCircleOutlined, CheckCircleOutlined, 
+  KeyOutlined, DeleteOutlined, WarningOutlined, UploadOutlined, SafetyOutlined,
+  ReloadOutlined, HomeOutlined
+} from "@ant-design/icons";
 import { UserItem } from "./types";
-import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import RegisterForm from "@/components/RegisterForm";
 
 export default function UsersManagement() {
@@ -41,12 +38,18 @@ export default function UsersManagement() {
   
   // 批量角色设置相关状态
   const [isBatchRoleLoading, setBatchRoleLoading] = useState(false);
+  
+  // 添加用户弹窗状态
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 
   // 使用ref来跟踪是否已经发送请求，避免重复请求
   const hasInitialFetchedRef = useRef(false);
   
   // 直接从session中获取管理员状态
   const isAdmin = session?.user?.role === "admin";
+
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
 
   // 获取用户列表数据 - 使用useCallback缓存函数
   const fetchUsers = useCallback(async () => {
@@ -57,7 +60,7 @@ export default function UsersManagement() {
       
       if (!response.ok) {
         if (response.status === 403) {
-          toast.error("获取用户数据失败：没有访问权限");
+          message.error("获取用户数据失败：没有访问权限");
           return;
         }
         
@@ -70,11 +73,11 @@ export default function UsersManagement() {
         setUsers(result.data);
         console.log("用户列表获取成功:", result.data.length);
       } else {
-        toast.error(result.error || "获取用户列表失败");
+        message.error(result.error || "获取用户列表失败");
       }
     } catch (error) {
       console.error("获取用户列表发生错误:", error);
-      toast.error("获取用户数据时发生错误，请稍后再试");
+      message.error("获取用户数据时发生错误，请稍后再试");
     } finally {
       setIsLoading(false);
     }
@@ -97,24 +100,24 @@ export default function UsersManagement() {
   // 获取角色标签
   const getRoleBadge = (role: string) => {
     if (role === 'admin') {
-      return <Badge className="bg-red-500 hover:bg-red-600">管理员</Badge>;
+      return <Tag color="red">管理员</Tag>;
     }
-    return <Badge variant="secondary">普通用户</Badge>;
+    return <Tag color="default">普通用户</Tag>;
   };
 
   // 获取状态标签
   const getStatusBadge = (status: number) => {
     if (status === 1) {
-      return <Badge className="bg-green-500 hover:bg-green-600">激活</Badge>;
+      return <Tag color="green">激活</Tag>;
     }
-    return <Badge variant="destructive">禁用</Badge>;
+    return <Tag color="red">禁用</Tag>;
   };
   
   // 打开修改密码对话框
   const openPasswordDialog = (user: UserItem) => {
     // 检查是否有多个用户被选中
     if (selectedUserIds.length > 1) {
-      toast.error("修改密码时只能选择一个用户，请取消多选后重试");
+      message.error("修改密码时只能选择一个用户，请取消多选后重试");
       return;
     }
     
@@ -160,7 +163,7 @@ export default function UsersManagement() {
   // 批量删除选中的用户
   const handleBatchDelete = async () => {
     if (selectedUserIds.length === 0) {
-      toast.error("请先选择要删除的用户");
+      message.error("请先选择要删除的用户");
       return;
     }
 
@@ -216,7 +219,7 @@ export default function UsersManagement() {
 
       // 展示结果
       if (results.success > 0) {
-        toast.success(`成功删除 ${results.success} 个用户`);
+        message.success(`成功删除 ${results.success} 个用户`);
         
         // 从用户列表中移除已删除的用户
         const successIds = selectedUserIds.filter((_, index) => index < results.success);
@@ -230,11 +233,11 @@ export default function UsersManagement() {
       // 如果有失败的，显示错误
       if (results.failed > 0) {
         console.error("删除失败详情:", results.errors);
-        toast.error(`${results.failed} 个用户删除失败，请查看控制台了解详情`);
+        message.error(`${results.failed} 个用户删除失败，请查看控制台了解详情`);
       }
     } catch (error) {
       console.error("批量删除用户失败:", error);
-      toast.error("删除用户时发生错误");
+      message.error("删除用户时发生错误");
     } finally {
       setIsDeleteConfirmOpen(false);
     }
@@ -248,7 +251,7 @@ export default function UsersManagement() {
     // 验证文件类型
     const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
     if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
-      toast.error("只支持Excel文件格式(.xlsx或.xls)");
+      message.error("只支持Excel文件格式(.xlsx或.xls)");
       return;
     }
     
@@ -272,17 +275,17 @@ export default function UsersManagement() {
       if (result.success) {
         setImportResults(result.results);
         setIsImportResultsOpen(true);
-        toast.success(result.message);
+        message.success(result.message);
         
         // 刷新用户列表
         hasInitialFetchedRef.current = false;
         await fetchUsers();
       } else {
-        toast.error(result.error || '导入失败');
+        message.error(result.error || '导入失败');
       }
     } catch (error: any) {
       console.error('Excel导入失败:', error);
-      toast.error(error.message || 'Excel导入过程中发生错误');
+      message.error(error.message || 'Excel导入过程中发生错误');
     } finally {
       setIsImporting(false);
       // 清空文件选择
@@ -293,7 +296,7 @@ export default function UsersManagement() {
   // 批量设置用户角色
   const handleBatchSetRole = async (role: 'admin' | 'user') => {
     if (selectedUserIds.length === 0) {
-      toast.error('请先选择要修改的用户');
+      message.error('请先选择要修改的用户');
       return;
     }
     
@@ -318,7 +321,7 @@ export default function UsersManagement() {
       }
       
       if (result.success) {
-        toast.success(result.message);
+        message.success(result.message);
         
         // 更新本地用户列表中的角色
         setUsers(prev => prev.map(user => {
@@ -332,11 +335,11 @@ export default function UsersManagement() {
         setSelectedUserIds([]);
         setSelectAll(false);
       } else {
-        toast.error(result.error || '设置角色失败');
+        message.error(result.error || '设置角色失败');
       }
     } catch (error: any) {
       console.error('批量设置角色失败:', error);
-      toast.error(error.message || '设置角色过程中发生错误');
+      message.error(error.message || '设置角色过程中发生错误');
     } finally {
       setBatchRoleLoading(false);
     }
@@ -347,12 +350,12 @@ export default function UsersManagement() {
     if (!selectedUser) return;
     
     if (!newPassword || !confirmPassword) {
-      toast.error("请输入密码");
+      message.error("请输入密码");
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      toast.error("两次输入的密码不一致");
+      message.error("两次输入的密码不一致");
       return;
     }
     
@@ -372,10 +375,10 @@ export default function UsersManagement() {
         throw new Error(data.error || "修改密码失败");
       }
       
-      toast.success(`已成功修改用户 ${selectedUser.username} 的密码`);
+      message.success(`已成功修改用户 ${selectedUser.username} 的密码`);
       setIsPasswordDialogOpen(false);
     } catch (error: any) {
-      toast.error(error.message || "修改密码时出错");
+      message.error(error.message || "修改密码时出错");
     } finally {
       setIsPasswordLoading(false);
     }
@@ -385,395 +388,438 @@ export default function UsersManagement() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '50vh' 
+      }}>
+        <Spin size="large" />
       </div>
     );
   }
 
   if (!isAdmin) {
     return (
-      <div className="space-y-6">
-        <Card className="bg-amber-50 border-amber-200 my-6">
-          <CardContent className="p-6">
-            <div className="flex items-center text-amber-800 mb-4">
-              <AlertCircle className="h-6 w-6 mr-3 flex-shrink-0" />
-              <p>只有管理员才能访问此页面。</p>
-            </div>
+      <div style={{ padding: 24 }}>
+        <Alert
+          message="访问受限"
+          description="只有管理员才能访问此页面。"
+          type="warning"
+          showIcon
+          icon={<ExclamationCircleOutlined />}
+          action={
             <Button 
-              variant="outline" 
               onClick={() => router.push("/pages/dashboard")}
-              className="mt-2"
+              icon={<HomeOutlined />}
             >
               返回仪表板
             </Button>
-          </CardContent>
-        </Card>
+          }
+          style={{ marginBottom: 24 }}
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold">用户管理</h2>
-          <Badge variant="secondary">{users.length}个用户</Badge>
+    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Space size="middle">
+          <Title level={2} style={{ margin: 0 }}>用户管理</Title>
+          <Tag color="blue">{users.length}个用户</Tag>
           {selectedUserIds.length > 0 && (
-            <Badge variant="destructive">{selectedUserIds.length}个用户已选中</Badge>
+            <Tag color="red">{selectedUserIds.length}个用户已选中</Tag>
           )}
-        </div>
-        <div className="flex items-center gap-2">
+        </Space>
+        <Space wrap>
           <Button
-            className="bg-green-600 hover:bg-green-700"
+            type="primary"
+            icon={<ReloadOutlined />}
             onClick={() => {
               // 手动刷新时重置状态，允许获取数据
               hasInitialFetchedRef.current = false;
               fetchUsers();
             }}
           >
-            <CheckCircle2 className="h-4 w-4 mr-2" />
             刷新数据
           </Button>
           
           {/* Excel导入按钮 */}
-          <div className="relative">
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleExcelImport}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              disabled={isImporting}
-            />
+          <Upload
+            accept=".xlsx,.xls"
+            beforeUpload={(file) => {
+              const event = { target: { files: [file], value: '' } } as any;
+              handleExcelImport(event);
+              return false; // 防止自动上传
+            }}
+            showUploadList={false}
+          >
             <Button
-              className="bg-purple-600 hover:bg-purple-700"
-              disabled={isImporting}
+              type="default"
+              icon={<UploadOutlined />}
+              loading={isImporting}
+              style={{ backgroundColor: '#722ed1', borderColor: '#722ed1', color: 'white' }}
             >
-              <Upload className="h-4 w-4 mr-2" />
               {isImporting ? '导入中...' : 'Excel导入'}
             </Button>
-          </div>
+          </Upload>
           
           {selectedUserIds.length > 0 && (
             <>
               <Button
-                className="bg-orange-600 hover:bg-orange-700"
+                type="default"
+                icon={<SafetyOutlined />}
                 onClick={() => handleBatchSetRole('admin')}
-                disabled={isBatchRoleLoading}
+                loading={isBatchRoleLoading}
+                style={{ backgroundColor: '#fa8c16', borderColor: '#fa8c16', color: 'white' }}
               >
-                <Shield className="h-4 w-4 mr-2" />
                 {isBatchRoleLoading ? '设置中...' : `设为管理员 (${selectedUserIds.length})`}
               </Button>
               
               <Button
-                className="bg-gray-600 hover:bg-gray-700"
+                type="default"
+                icon={<UserOutlined />}
                 onClick={() => handleBatchSetRole('user')}
-                disabled={isBatchRoleLoading}
+                loading={isBatchRoleLoading}
+                style={{ backgroundColor: '#595959', borderColor: '#595959', color: 'white' }}
               >
-                <User className="h-4 w-4 mr-2" />
                 {isBatchRoleLoading ? '设置中...' : `设为普通用户 (${selectedUserIds.length})`}
               </Button>
               
               <Button
-                variant="destructive"
+                danger
+                icon={<DeleteOutlined />}
                 onClick={() => setIsDeleteConfirmOpen(true)}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
                 批量删除 ({selectedUserIds.length})
               </Button>
             </>
           )}
           
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <UserPlus className="h-4 w-4 mr-2" />
-                添加用户
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>添加新用户</DialogTitle>
-                <DialogDescription>
-                  创建一个新的用户账号
-                </DialogDescription>
-              </DialogHeader>
-              <RegisterForm 
-                onSuccess={() => {
-                  // 重新加载用户列表
-                  hasInitialFetchedRef.current = false;
-                  fetchUsers();
-                }} 
-                isDialog={true} 
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
+          <Button
+            type="primary"
+            icon={<UserAddOutlined />}
+            onClick={() => setIsAddUserModalOpen(true)}
+          >
+            添加用户
+          </Button>
+        </Space>
       </div>
 
-      <div className="overflow-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-center">
-                <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selectAll}
-                    onCheckedChange={handleSelectAll}
-                    aria-label="全选"
-                  />
-                </div>
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                用户名
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                密码 (加密存储)
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                昵称
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                邮箱
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                角色
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                状态
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                创建时间
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                更新时间
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
-              <tr 
-                key={user.id} 
-                className={`hover:bg-gray-50 ${selectedUserIds.includes(user.id) ? 'bg-blue-50' : ''}`}
-                onClick={() => handleCheckboxChange(user.id)}
+      <Table
+        rowSelection={{
+          selectedRowKeys: selectedUserIds,
+          onChange: (selectedRowKeys) => {
+            setSelectedUserIds(selectedRowKeys as string[]);
+            setSelectAll(selectedRowKeys.length === users.length);
+          },
+          onSelectAll: (selected, selectedRows, changeRows) => {
+            handleSelectAll();
+          },
+        }}
+        columns={[
+          {
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
+            width: 80,
+          },
+          {
+            title: '用户名',
+            dataIndex: 'username',
+            key: 'username',
+            render: (text) => <Text strong>{text}</Text>,
+          },
+          {
+            title: '密码 (加密存储)',
+            dataIndex: 'password',
+            key: 'password',
+            render: (text) => <Text code style={{ fontSize: '12px' }}>{text}</Text>,
+          },
+          {
+            title: '昵称',
+            dataIndex: 'nickname',
+            key: 'nickname',
+          },
+          {
+            title: '邮箱',
+            dataIndex: 'email',
+            key: 'email',
+          },
+          {
+            title: '角色',
+            dataIndex: 'role',
+            key: 'role',
+            render: (role) => getRoleBadge(role),
+          },
+          {
+            title: '状态',
+            dataIndex: 'is_active',
+            key: 'is_active',
+            render: (status) => getStatusBadge(status),
+          },
+          {
+            title: '创建时间',
+            dataIndex: 'created_at',
+            key: 'created_at',
+            render: (date) => new Date(date).toLocaleString('zh-CN'),
+          },
+          {
+            title: '更新时间',
+            dataIndex: 'updated_at',
+            key: 'updated_at',
+            render: (date) => new Date(date).toLocaleString('zh-CN'),
+          },
+          {
+            title: '操作',
+            key: 'action',
+            render: (_, user) => (
+              <Button
+                type="link"
+                icon={<KeyOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openPasswordDialog(user);
+                }}
               >
-                <td className="px-6 py-4 whitespace-nowrap text-center" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-center">
-                    <Checkbox
-                      checked={selectedUserIds.includes(user.id)}
-                      onCheckedChange={() => handleCheckboxChange(user.id)}
-                      aria-label={`选择用户 ${user.username}`}
-                    />
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.username}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{user.password}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.nickname}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {getRoleBadge(user.role)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {getStatusBadge(user.is_active)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(user.created_at).toLocaleString('zh-CN')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(user.updated_at).toLocaleString('zh-CN')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openPasswordDialog(user)}
-                    className="text-blue-500 hover:text-blue-700"
-                  >
-                    <Key className="h-4 w-4 mr-1" />
-                    修改密码
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {users.length === 0 && (
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="flex items-center p-6 text-blue-800">
-            <Users className="h-6 w-6 mr-3 flex-shrink-0" />
-            <p>暂无用户数据。</p>
-          </CardContent>
-        </Card>
-      )}
+                修改密码
+              </Button>
+            ),
+          },
+        ]}
+        dataSource={users}
+        rowKey="id"
+        pagination={{
+          total: users.length,
+          pageSize: 10,
+          showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
+          showSizeChanger: true,
+          showQuickJumper: true,
+        }}
+        locale={{
+          emptyText: (
+            <div style={{ padding: '40px 0', textAlign: 'center' }}>
+              <UserOutlined style={{ fontSize: 48, color: token.colorTextTertiary, marginBottom: 16 }} />
+              <div>暂无用户数据</div>
+            </div>
+          ),
+        }}
+      />
+      
+      {/* 添加用户弹窗 */}
+      <Modal
+        title="添加新用户"
+        open={isAddUserModalOpen}
+        onCancel={() => setIsAddUserModalOpen(false)}
+        footer={null}
+        width={500}
+      >
+        <RegisterForm 
+          onSuccess={() => {
+            setIsAddUserModalOpen(false);
+            hasInitialFetchedRef.current = false;
+            fetchUsers();
+          }} 
+          isDialog={true} 
+        />
+      </Modal>
       
       {/* 修改密码对话框 */}
-      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>修改密码</DialogTitle>
-            <DialogDescription>
-              为用户 {selectedUser?.username} 设置新密码
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">新密码</Label>
-              <Input
-                id="newPassword"
-                type="password"
+      <Modal
+        title="修改密码"
+        open={isPasswordDialogOpen}
+        onCancel={() => setIsPasswordDialogOpen(false)}
+        footer={[
+          <Button 
+            key="cancel"
+            onClick={() => setIsPasswordDialogOpen(false)}
+            disabled={isPasswordLoading}
+          >
+            取消
+          </Button>,
+          <Button 
+            key="submit"
+            type="primary"
+            onClick={handlePasswordChange}
+            loading={isPasswordLoading}
+          >
+            保存
+          </Button>
+        ]}
+      >
+        <div>
+          <Text type="secondary">为用户 {selectedUser?.username} 设置新密码</Text>
+          <Divider />
+          <Form layout="vertical">
+            <Form.Item label="新密码">
+              <Input.Password
                 placeholder="输入新密码"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">确认密码</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
+            </Form.Item>
+            <Form.Item label="确认密码">
+              <Input.Password
                 placeholder="再次输入新密码"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsPasswordDialogOpen(false)}
-              disabled={isPasswordLoading}
-            >
-              取消
-            </Button>
-            <Button 
-              onClick={handlePasswordChange}
-              disabled={isPasswordLoading}
-            >
-              {isPasswordLoading ? "处理中..." : "保存"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </Form.Item>
+          </Form>
+        </div>
+      </Modal>
       
       {/* 添加用户对话框组件已移至按钮旁 */}
       
       {/* 批量删除确认对话框 */}
-      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center text-red-600">
-              <AlertTriangle className="h-5 w-5 mr-2" />
-              确认删除
-            </DialogTitle>
-            <DialogDescription>
-              您确定要删除选中的 {selectedUserIds.length} 个用户吗？此操作不可恢复。
-            </DialogDescription>
-          </DialogHeader>
+      <Modal
+        title={
+          <Space>
+            <WarningOutlined style={{ color: '#ff4d4f' }} />
+            <span style={{ color: '#ff4d4f' }}>确认删除</span>
+          </Space>
+        }
+        open={isDeleteConfirmOpen}
+        onCancel={() => setIsDeleteConfirmOpen(false)}
+        footer={[
+          <Button 
+            key="cancel"
+            onClick={() => setIsDeleteConfirmOpen(false)}
+          >
+            取消
+          </Button>,
+          <Button 
+            key="delete"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={handleBatchDelete}
+          >
+            确认删除
+          </Button>
+        ]}
+      >
+        <div>
+          <Text>您确定要删除选中的 {selectedUserIds.length} 个用户吗？此操作不可恢复。</Text>
           
-          <div className="py-4">
-            <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-800 text-sm mb-4">
-              <p>警告：删除用户将同时删除与其相关的所有数据！</p>
-            </div>
-            
-            <ul className="max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50">
-              {users
-                .filter(user => selectedUserIds.includes(user.id))
-                .map(user => (
-                  <li key={user.id} className="py-1 flex items-center">
-                    <CheckSquare className="h-4 w-4 text-blue-500 mr-2" />
-                    <span className="font-medium">{user.username}</span>
-                    {user.nickname && <span className="text-gray-500 ml-2">({user.nickname})</span>}
-                    {user.role === 'admin' && <Badge className="ml-2 bg-red-500">管理员</Badge>}
-                  </li>
-                ))}
-            </ul>
+          <Alert
+            message="警告：删除用户将同时删除与其相关的所有数据！"
+            type="warning"
+            showIcon
+            style={{ margin: '16px 0' }}
+          />
+          
+          <div style={{ 
+            maxHeight: 160, 
+            overflowY: 'auto', 
+            border: `1px solid ${token.colorBorder}`, 
+            borderRadius: token.borderRadius,
+            padding: 8,
+            backgroundColor: token.colorBgLayout
+          }}>
+            {users
+              .filter(user => selectedUserIds.includes(user.id))
+              .map(user => (
+                <div key={user.id} style={{ 
+                  padding: '4px 0', 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  gap: 8
+                }}>
+                  <CheckCircleOutlined style={{ color: token.colorPrimary }} />
+                  <Text strong>{user.username}</Text>
+                  {user.nickname && <Text type="secondary">({user.nickname})</Text>}
+                  {user.role === 'admin' && <Tag color="red">管理员</Tag>}
+                </div>
+              ))}
           </div>
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsDeleteConfirmOpen(false)}
-            >
-              取消
-            </Button>
-            <Button 
-              variant="destructive"
-              onClick={handleBatchDelete}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              确认删除
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </Modal>
       
       {/* Excel导入结果对话框 */}
-      <Dialog open={isImportResultsOpen} onOpenChange={setIsImportResultsOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center text-green-600">
-              <CheckCircle2 className="h-5 w-5 mr-2" />
-              Excel导入结果
-            </DialogTitle>
-            <DialogDescription>
-              以下是Excel文件导入的详细结果
-            </DialogDescription>
-          </DialogHeader>
+      <Modal
+        title={
+          <Space>
+            <CheckCircleOutlined style={{ color: '#52c41a' }} />
+            <span style={{ color: '#52c41a' }}>Excel导入结果</span>
+          </Space>
+        }
+        open={isImportResultsOpen}
+        onCancel={() => setIsImportResultsOpen(false)}
+        footer={[
+          <Button 
+            key="ok"
+            type="primary"
+            onClick={() => setIsImportResultsOpen(false)}
+          >
+            确定
+          </Button>
+        ]}
+        width={600}
+      >
+        <div>
+          <Text type="secondary">以下是Excel文件导入的详细结果</Text>
+          <Divider />
           
           {importResults && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-green-600">{importResults.success}</div>
-                  <div className="text-sm text-green-700">成功创建</div>
-                </div>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-blue-600">{importResults.skipped}</div>
-                  <div className="text-sm text-blue-700">跳过已存在</div>
-                </div>
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-red-600">{importResults.failed}</div>
-                  <div className="text-sm text-red-700">导入失败</div>
-                </div>
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(3, 1fr)', 
+                gap: 16, 
+                textAlign: 'center' 
+              }}>
+                <Card size="small" style={{ backgroundColor: '#f6ffed', borderColor: '#b7eb8f' }}>
+                  <div style={{ fontSize: 24, fontWeight: 'bold', color: '#52c41a' }}>
+                    {importResults.success}
+                  </div>
+                  <Text style={{ color: '#389e0d' }}>成功创建</Text>
+                </Card>
+                <Card size="small" style={{ backgroundColor: '#e6f7ff', borderColor: '#91d5ff' }}>
+                  <div style={{ fontSize: 24, fontWeight: 'bold', color: '#1890ff' }}>
+                    {importResults.skipped}
+                  </div>
+                  <Text style={{ color: '#096dd9' }}>跳过已存在</Text>
+                </Card>
+                <Card size="small" style={{ backgroundColor: '#fff1f0', borderColor: '#ffadd2' }}>
+                  <div style={{ fontSize: 24, fontWeight: 'bold', color: '#ff4d4f' }}>
+                    {importResults.failed}
+                  </div>
+                  <Text style={{ color: '#cf1322' }}>导入失败</Text>
+                </Card>
               </div>
               
-              <div className="text-sm text-gray-600">
-                <strong>总计:</strong> {importResults.total} 条记录
-              </div>
+              <Text>
+                <Text strong>总计:</Text> {importResults.total} 条记录
+              </Text>
               
               {importResults.errors && importResults.errors.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-red-600 mb-2">错误详情:</h4>
-                  <div className="max-h-40 overflow-y-auto border rounded-md p-2 bg-red-50">
+                  <Title level={5} style={{ color: '#ff4d4f' }}>错误详情:</Title>
+                  <div style={{ 
+                    maxHeight: 160, 
+                    overflowY: 'auto', 
+                    border: `1px solid #ffccc7`,
+                    borderRadius: token.borderRadius,
+                    padding: 8,
+                    backgroundColor: '#fff1f0'
+                  }}>
                     {importResults.errors.map((error: string, index: number) => (
-                      <div key={index} className="text-sm text-red-700 py-1">
+                      <div key={index} style={{ 
+                        color: '#a8071a', 
+                        paddingBottom: 4,
+                        fontSize: '13px'
+                      }}>
                         • {error}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-            </div>
+            </Space>
           )}
-          
-          <DialogFooter>
-            <Button onClick={() => setIsImportResultsOpen(false)}>
-              确定
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </Modal>
     </div>
   );
 }
