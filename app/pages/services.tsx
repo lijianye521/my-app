@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Button, Card, Tag, Typography, Space, theme } from "antd";
+import { Button, Card, Tag, Typography, Space, theme, message } from "antd";
 import { PlusOutlined, ExportOutlined, EditOutlined, DeleteOutlined, MenuOutlined, CheckOutlined, SortAscendingOutlined } from "@ant-design/icons";
 import { PageProps, ServiceItem, PlatformItem } from "./types";
 import { iconOptions, colorOptions } from "./data";
-import toast from "react-hot-toast";
 import {
   DndContext,
   closestCenter,
@@ -79,7 +78,7 @@ function ServiceCard({ service }: { service: ServiceItem }) {
   
   return (
     <div style={{
-      background: `linear-gradient(45deg, ${token.colorSuccess}20, ${token.colorSuccessBg})`,
+      background: `linear-gradient(45deg, ${token.colorPrimary}20, ${token.colorPrimaryBg})`,
       padding: 2,
       borderRadius: token.borderRadiusLG
     }}>
@@ -109,7 +108,7 @@ function ServiceCard({ service }: { service: ServiceItem }) {
             >
               <Icon className="h-6 w-6 text-white" />
             </div>
-            <Title level={5} style={{ margin: 0, color: token.colorSuccess }}>
+            <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
               {service.name}
             </Title>
           </Space>
@@ -185,7 +184,7 @@ function SortableServiceItem({ service, isSorting, onEdit, onDelete }: SortableS
           backgroundColor: 'white',
           height: 192,
           ...(isDragging && { 
-            boxShadow: `0 0 0 2px ${token.colorSuccess}`,
+            boxShadow: `0 0 0 2px ${token.colorPrimary}`,
             transform: 'scale(1.02)' 
           })
         }}
@@ -212,7 +211,7 @@ function SortableServiceItem({ service, isSorting, onEdit, onDelete }: SortableS
               >
                 <Icon className="h-6 w-6 text-white" />
               </div>
-              <Title level={5} style={{ margin: 0, color: token.colorSuccess }}>
+              <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
                 {service.name}
               </Title>
             </Space>
@@ -353,19 +352,13 @@ export default function Services({
         // 更新前端状态
         setTechServices(sortedItems);
         setIsSorting(false);
-        toast.success('服务排序更新成功', {
-          icon: '👍',
-        });
+        message.success('服务排序更新成功');
       } else {
-        toast.error(result.message || '保存排序时发生错误', {
-          icon: '❌',
-        });
+        message.error(result.message || '保存排序时发生错误');
       }
     } catch (error) {
       console.error('更新排序失败:', error);
-      toast.error('更新排序过程中发生错误，请查看控制台', {
-        icon: '❌',
-      });
+      message.error('更新排序过程中发生错误，请查看控制台');
     }
   };
 
@@ -392,7 +385,6 @@ export default function Services({
               icon={<CheckOutlined />}
               onClick={saveSortOrder}
               type="primary"
-              style={{ backgroundColor: token.colorSuccess, borderColor: token.colorSuccess }}
             >
               确认排序
             </Button>
@@ -404,7 +396,6 @@ export default function Services({
               icon={<PlusOutlined />}
               onClick={() => onAddNew?.("service")}
               type="primary"
-              style={{ backgroundColor: token.colorSuccess, borderColor: token.colorSuccess }}
             >
               新增服务
             </Button>
@@ -492,7 +483,7 @@ export default function Services({
                         >
                           <Icon className="h-6 w-6 text-white" />
                         </div>
-                        <Title level={5} style={{ margin: 0, color: token.colorSuccess }}>
+                        <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
                           {service.name}
                         </Title>
                       </Space>

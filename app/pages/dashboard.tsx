@@ -38,7 +38,8 @@ function openItem(url: string, urlType?: string) {
 export default function Dashboard({
   managementPlatforms,
   techServices,
-}: PageProps) {
+  onPageChange,
+}: PageProps & { onPageChange?: (page: string) => void }) {
   const { token } = theme.useToken();
   const { Title, Text } = Typography;
   
@@ -120,10 +121,12 @@ export default function Dashboard({
             style={{ 
               borderRadius: token.borderRadiusLG,
               transition: 'all 0.3s ease',
+              cursor: 'pointer'
             }}
             styles={{
               body: { padding: '16px 20px' }
             }}
+            onClick={() => onPageChange?.('platforms')}
           >
             <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
               <Space align="center" size="middle">
@@ -169,10 +172,12 @@ export default function Dashboard({
             style={{ 
               borderRadius: token.borderRadiusLG,
               transition: 'all 0.3s ease',
+              cursor: 'pointer'
             }}
             styles={{
               body: { padding: '16px 20px' }
             }}
+            onClick={() => onPageChange?.('services')}
           >
             <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
               <Space align="center" size="middle">

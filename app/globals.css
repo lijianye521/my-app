@@ -223,4 +223,56 @@ select option:hover {
   background-color: #f3f4f6 !important;
   color: #1f2937 !important;
 }
+
+/* Ant Design Button 动效增强 */
+.ant-btn {
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+  transform: translateY(0) !important;
+}
+
+.ant-btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15) !important;
+}
+
+.ant-btn:active {
+  transform: translateY(0) !important;
+  transition: all 0.1s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+}
+
+.ant-btn:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Primary 按钮特殊处理 */
+.ant-btn-primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px 0 rgba(24, 144, 255, 0.4) !important;
+}
+
+/* Default 按钮特殊处理 */
+.ant-btn-default:hover {
+  transform: translateY(-1px) !important;
+  border-color: #40a9ff !important;
+  color: #40a9ff !important;
+}
+
+/* Danger 按钮特殊处理 */
+.ant-btn-primary.ant-btn-dangerous:hover,
+.ant-btn-default.ant-btn-dangerous:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px 0 rgba(255, 77, 79, 0.4) !important;
+}
+
+/* 文本按钮 */
+.ant-btn-text:hover {
+  transform: translateY(-1px) !important;
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 链接按钮 */
+.ant-btn-link:hover {
+  transform: translateY(-1px) !important;
+}
  

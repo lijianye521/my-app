@@ -146,7 +146,6 @@ import {
   ForwardOutlined,
   RollbackOutlined,
   HomeOutlined,
-  BookFilled,
   DragOutlined,
   // 新增的图标
   ApiOutlined,
@@ -403,7 +402,7 @@ export const menuItems: MenuItem[] = [
   { id: "platforms", label: "管理平台", icon: SettingOutlined },
   { id: "services", label: "技术服务", icon: DatabaseOutlined },
   { id: "users", label: "用户管理", icon: UserSwitchOutlined },
-  { id: "docs", label: "帮助中心", icon: BookFilled },
+  { id: "docs", label: "帮助中心", icon: BookOutlined },
   { id: "operation-logs", label: "操作日志", icon: FileTextOutlined },
   { id: "ai-agent", label: "Agent", icon: FireOutlined },
   { id: "coming-soon", label: "敬请期待", icon: ClockCircleOutlined },

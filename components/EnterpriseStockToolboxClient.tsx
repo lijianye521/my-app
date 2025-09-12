@@ -24,8 +24,10 @@ import OperationLogs from "@/app/pages/operation-logs";
 import FormDialog from "@/app/pages/form-dialog";
 import AIAgent from "@/app/pages/ai-agent";
 import ComingSoon from "@/app/pages/coming-soon";
+import Agents from "@/app/pages/agents";
 
 import { PlatformItem, ServiceItem, FormDataType } from "@/app/pages/types";
+import { AgentItem } from "@/app/pages/agents";
 import { menuItems, iconOptions } from "@/app/pages/data";
 
 const getIconByName = (iconName: string) => {
@@ -36,11 +38,13 @@ const getIconByName = (iconName: string) => {
 interface Props {
   initialPlatforms: PlatformItem[];
   initialServices: ServiceItem[];
+  initialAgents: AgentItem[];
 }
 
 export default function EnterpriseStockToolboxClient({
   initialPlatforms,
   initialServices,
+  initialAgents,
 }: Props) {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -54,15 +58,17 @@ export default function EnterpriseStockToolboxClient({
     type: "success" | "error";
   } | null>(null);
 
-  console.log('EnterpriseStockToolboxClient接收数据:', { initialPlatforms, initialServices });
+  console.log('EnterpriseStockToolboxClient接收数据:', { initialPlatforms, initialServices, initialAgents });
 
   const [managementPlatforms, setManagementPlatforms] = useState<PlatformItem[]>(initialPlatforms);
   const [techServices, setTechServices] = useState<ServiceItem[]>(initialServices);
+  const [agents, setAgents] = useState<AgentItem[]>(initialAgents);
 
   useEffect(() => {
     console.log('managementPlatforms状态更新:', managementPlatforms);
     console.log('techServices状态更新:', techServices);
-  }, [managementPlatforms, techServices]);
+    console.log('agents状态更新:', agents);
+  }, [managementPlatforms, techServices, agents]);
 
   // 更新组件初始化数据
   useEffect(() => {
@@ -72,7 +78,10 @@ export default function EnterpriseStockToolboxClient({
     if (initialServices?.length) {
       setTechServices(initialServices);
     }
-  }, [initialPlatforms, initialServices]);
+    if (initialAgents?.length) {
+      setAgents(initialAgents);
+    }
+  }, [initialPlatforms, initialServices, initialAgents]);
 
   const handleAddNew = (type: string) => {
     setNewItemType(type);
@@ -100,8 +109,10 @@ export default function EnterpriseStockToolboxClient({
           // UI更新
           if (type === "platform") {
             setManagementPlatforms((prev) => prev.filter((item) => item.id !== id));
-          } else {
+          } else if (type === "service") {
             setTechServices((prev) => prev.filter((item) => item.id !== id));
+          } else if (type === "agent") {
+            setAgents((prev) => prev.filter((item) => item.id !== id));
           }
           
           setNotification({
@@ -176,16 +187,22 @@ export default function EnterpriseStockToolboxClient({
             setManagementPlatforms((prev) =>
               prev.map((item) => (item.id === editingItem.id ? newItem : item))
             );
-          } else {
+          } else if (newItemType === "service") {
             setTechServices((prev) =>
+              prev.map((item) => (item.id === editingItem.id ? newItem : item))
+            );
+          } else if (newItemType === "agent") {
+            setAgents((prev) =>
               prev.map((item) => (item.id === editingItem.id ? newItem : item))
             );
           }
         } else {
           if (newItemType === "platform") {
             setManagementPlatforms((prev) => [...prev, newItem]);
-          } else {
+          } else if (newItemType === "service") {
             setTechServices((prev) => [...prev, newItem]);
+          } else if (newItemType === "agent") {
+            setAgents((prev) => [...prev, newItem]);
           }
         }
         
@@ -225,9 +242,17 @@ export default function EnterpriseStockToolboxClient({
       onDelete: handleDelete,
     };
 
+    const agentProps = {
+      agents,
+      setAgents,
+      onAddNew: handleAddNew,
+      onEdit: handleEdit,
+      onDelete: handleDelete,
+    };
+
     switch (activeSection) {
       case "dashboard":
-        return <Dashboard {...commonProps} />;
+        return <Dashboard {...commonProps} onPageChange={setActiveSection} />;
       case "platforms":
         return <Platforms {...commonProps} />;
       case "services":
@@ -239,11 +264,11 @@ export default function EnterpriseStockToolboxClient({
       case "operation-logs":
         return <OperationLogs onBack={() => setActiveSection("dashboard")} />;
       case "ai-agent":
-        return <AIAgent />;
+        return <Agents {...agentProps} />;
       case "coming-soon":
         return <ComingSoon />;
       default:
-        return <Dashboard {...commonProps} />;
+        return <Dashboard {...commonProps} onPageChange={setActiveSection} />;
     }
   };
 

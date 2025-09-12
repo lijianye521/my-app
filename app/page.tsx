@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import EnterpriseStockToolboxClient from "@/components/EnterpriseStockToolboxClient";
 import { PlatformItem, ServiceItem } from "./pages/types";
+import { AgentItem } from "./pages/agents";
 
 export default function Home() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [platforms, setPlatforms] = useState<PlatformItem[]>([]);
   const [services, setServices] = useState<ServiceItem[]>([]);
+  const [agents, setAgents] = useState<AgentItem[]>([]);
   const [redirected, setRedirected] = useState(false);
 
   // 获取平台和服务数据
@@ -49,6 +51,10 @@ export default function Home() {
       
       if (data.services) {
         setServices(data.services);
+      }
+
+      if (data.agents) {
+        setAgents(data.agents);
       }
     } catch (error) {
       console.error('获取数据失败:', error);
@@ -96,6 +102,7 @@ export default function Home() {
         <EnterpriseStockToolboxClient 
           initialPlatforms={platforms} 
           initialServices={services}
+          initialAgents={agents}
         />
       </main>
     );

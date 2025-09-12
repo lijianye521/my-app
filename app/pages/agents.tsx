@@ -26,12 +26,17 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+// Agent项类型定义
+export interface AgentItem extends ServiceItem {
+  // Agent特有属性可以在这里扩展
+}
+
 // 定义拖拽动画
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
     styles: {
       active: {
-        opacity: '0',  // 从0.5改为0，完全隐藏原始位置的项
+        opacity: '0',  // 完全隐藏原始位置的项
       },
     },
   }),
@@ -45,40 +50,34 @@ const getIconByName = (iconName: string) => {
 
 // 获取颜色值
 const getColorByValue = (colorValue: string | undefined) => {
-  if (!colorValue) return '#3b82f6';
+  if (!colorValue) return '#8b5cf6';  // Agent使用紫色作为默认色
   const colorOption = colorOptions.find((option) => option.value === colorValue);
-  return colorOption ? colorOption.color : '#3b82f6';
+  return colorOption ? colorOption.color : '#8b5cf6';
 };
 
-// 访问平台的函数 - 根据URL类型选择打开方式
-function openPlatform(url: string, urlType?: string) {
-  console.log("openPlatform", { url, urlType });
+// 访问Agent的函数 - 根据URL类型选择打开方式
+function openAgent(url: string, urlType?: string) {
+  console.log("openAgent", { url, urlType });
   
   if (urlType === 'internal') {
     // 内网链接 - 在新标签页中打开
     window.open(url, '_blank');
-  } 
-  // else if (urlType === 'internal_terminal') {
-  //   // 终端内跳转 - 使用当前域名拼接
-  //   const fullUrl = window.location.origin + url;
-  //   window.open(fullUrl, '_blank');
-  // } 
-  else {
+  } else {
     // 终端命令或默认情况 - 使用windlocal协议
     window.location.href = "windlocal://open?" + encodeURIComponent(url);
   }
 }
 
-// 平台卡片组件 - 用于拖拽覆盖层
-function PlatformCard({ platform }: { platform: PlatformItem }) {
-  const Icon = getIconByName(platform.iconName);
+// Agent卡片组件 - 用于拖拽覆盖层
+function AgentCard({ agent }: { agent: AgentItem }) {
+  const Icon = getIconByName(agent.iconName);
   const { token } = theme.useToken();
   const { Title, Text } = Typography;
-  const platformColor = getColorByValue(platform.color);
+  const agentColor = getColorByValue(agent.color);
   
   return (
     <div style={{
-      background: `linear-gradient(45deg, ${token.colorPrimary}20, ${token.colorPrimaryBg})`,
+      background: `linear-gradient(45deg, ${token.colorWarning}20, ${token.colorWarningBg})`,
       padding: 2,
       borderRadius: token.borderRadiusLG
     }}>
@@ -99,7 +98,7 @@ function PlatformCard({ platform }: { platform: PlatformItem }) {
               style={{
                 width: 48,
                 height: 48,
-                background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)`,
+                background: `linear-gradient(135deg, ${agentColor}, ${agentColor}cc)`,
                 borderRadius: token.borderRadiusLG,
                 display: 'flex',
                 alignItems: 'center',
@@ -108,17 +107,17 @@ function PlatformCard({ platform }: { platform: PlatformItem }) {
             >
               <Icon className="h-6 w-6 text-white" />
             </div>
-            <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
-              {platform.name}
+            <Title level={5} style={{ margin: 0, color: token.colorWarning }}>
+              {agent.name}
             </Title>
           </Space>
         }
       >
         <div style={{ padding: '0 20px 20px' }}>
           <div style={{ minHeight: 20, marginBottom: 16 }}>
-            {platform.description && (
+            {agent.description && (
               <Text type="secondary" style={{ fontSize: 13 }} ellipsis>
-                {platform.description}
+                {agent.description}
               </Text>
             )}
           </div>
@@ -127,7 +126,109 @@ function PlatformCard({ platform }: { platform: PlatformItem }) {
             disabled
             icon={<ExportOutlined />}
           >
-            访问平台
+            访问Agent
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// Agent卡片项组件 - 用于非排序模式
+interface AgentCardItemProps {
+  agent: AgentItem;
+  onEdit: ((item: PlatformItem | ServiceItem, type: string) => void) | undefined;
+  onDelete: ((id: string, type: string) => void) | undefined;
+}
+
+function AgentCardItem({ agent, onEdit, onDelete }: AgentCardItemProps) {
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
+  const [isHovered, setIsHovered] = useState(false);
+  const agentColor = getColorByValue(agent.color);
+  const Icon = getIconByName(agent.iconName);
+  
+  return (
+    <div 
+      className="gradient-border"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Card
+        hoverable
+        style={{
+          backgroundColor: 'white',
+          height: 192
+        }}
+        styles={{
+          body: { padding: 0 },
+          header: { padding: '16px 20px', borderBottom: 'none' }
+        }}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Space align="center">
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  background: `linear-gradient(135deg, ${agentColor}, ${agentColor}cc)`,
+                  borderRadius: token.borderRadiusLG,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Icon className="h-6 w-6 text-white" />
+              </div>
+              <Title level={5} style={{ margin: 0, color: token.colorWarning }}>
+                {agent.name}
+              </Title>
+            </Space>
+            <Space 
+              size="small" 
+              style={{ 
+                opacity: isHovered ? 1 : 0,
+                transition: 'opacity 0.2s ease-in-out'
+              }}
+            >
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(agent, "agent");
+                }}
+              />
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.(agent.id, "agent");
+                }}
+              />
+            </Space>
+          </div>
+        }
+      >
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ minHeight: 20, marginBottom: 16 }}>
+            {agent.description && (
+              <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={agent.description}>
+                {agent.description}
+              </Text>
+            )}
+          </div>
+          <Button
+            block
+            type="default"
+            icon={<ExportOutlined />}
+            onClick={() => openAgent(agent.url, agent.urlType)}
+          >
+            访问Agent
           </Button>
         </div>
       </Card>
@@ -136,14 +237,14 @@ function PlatformCard({ platform }: { platform: PlatformItem }) {
 }
 
 // 排序项组件
-interface SortablePlatformItemProps {
-  platform: PlatformItem;
+interface SortableAgentItemProps {
+  agent: AgentItem;
   isSorting: boolean;
   onEdit: ((item: PlatformItem | ServiceItem, type: string) => void) | undefined;
   onDelete: ((id: string, type: string) => void) | undefined;
 }
 
-function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: SortablePlatformItemProps) {
+function SortableAgentItem({ agent, isSorting, onEdit, onDelete }: SortableAgentItemProps) {
   const { 
     attributes, 
     listeners, 
@@ -151,12 +252,12 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
     transform, 
     transition,
     isDragging
-  } = useSortable({ id: platform.id });
+  } = useSortable({ id: agent.id });
   
   const { token } = theme.useToken();
   const { Title, Text } = Typography;
   const [isHovered, setIsHovered] = useState(false);
-  const platformColor = getColorByValue(platform.color);
+  const agentColor = getColorByValue(agent.color);
   
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -166,7 +267,7 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
     cursor: isSorting ? (isDragging ? 'grabbing' : 'grab') : 'default',
   };
   
-  const Icon = getIconByName(platform.iconName);
+  const Icon = getIconByName(agent.iconName);
   
   return (
     <div 
@@ -184,7 +285,7 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
           backgroundColor: 'white',
           height: 192,
           ...(isDragging && { 
-            boxShadow: `0 0 0 2px ${token.colorPrimary}`,
+            boxShadow: `0 0 0 2px ${token.colorWarning}`,
             transform: 'scale(1.02)' 
           })
         }}
@@ -202,7 +303,7 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
                 style={{
                   width: 48,
                   height: 48,
-                  background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)`,
+                  background: `linear-gradient(135deg, ${agentColor}, ${agentColor}cc)`,
                   borderRadius: token.borderRadiusLG,
                   display: 'flex',
                   alignItems: 'center',
@@ -211,8 +312,8 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
               >
                 <Icon className="h-6 w-6 text-white" />
               </div>
-              <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
-                {platform.name}
+              <Title level={5} style={{ margin: 0, color: token.colorWarning }}>
+                {agent.name}
               </Title>
             </Space>
             {!isSorting && (
@@ -229,7 +330,7 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
                   icon={<EditOutlined />}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onEdit?.(platform, "platform");
+                    onEdit?.(agent, "agent");
                   }}
                 />
                 <Button
@@ -239,7 +340,7 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
                   icon={<DeleteOutlined />}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDelete?.(platform.id, "platform");
+                    onDelete?.(agent.id, "agent");
                   }}
                 />
               </Space>
@@ -249,9 +350,9 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
       >
         <div style={{ padding: '0 20px 20px' }}>
           <div style={{ minHeight: 20, marginBottom: 16 }}>
-            {platform.description && (
-              <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={platform.description}>
-                {platform.description}
+            {agent.description && (
+              <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={agent.description}>
+                {agent.description}
               </Text>
             )}
           </div>
@@ -259,10 +360,10 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
             block
             type="default"
             icon={<ExportOutlined />}
-            onClick={() => openPlatform(platform.url, platform.urlType)}
+            onClick={() => openAgent(agent.url, agent.urlType)}
             disabled={isSorting}
           >
-            访问平台
+            访问Agent
           </Button>
         </div>
       </Card>
@@ -270,16 +371,21 @@ function SortablePlatformItem({ platform, isSorting, onEdit, onDelete }: Sortabl
   );
 }
 
-export default function Platforms({
-  managementPlatforms,
-  setManagementPlatforms,
+interface AgentPageProps extends PageProps {
+  agents?: AgentItem[];
+  setAgents?: (agents: AgentItem[]) => void;
+}
+
+export default function Agents({
+  agents = [],
+  setAgents,
   onAddNew,
   onEdit,
   onDelete,
-}: PageProps) {
+}: AgentPageProps) {
   const [isSorting, setIsSorting] = useState(false);
-  const [sortedItems, setSortedItems] = useState([...managementPlatforms]);
-  const [activePlatform, setActivePlatform] = useState<PlatformItem | null>(null);
+  const [sortedItems, setSortedItems] = useState([...agents]);
+  const [activeAgent, setActiveAgent] = useState<AgentItem | null>(null);
   
   const { token } = theme.useToken();
   const { Title, Text } = Typography;
@@ -299,7 +405,7 @@ export default function Platforms({
     const { active } = event;
     const activeItem = sortedItems.find(item => item.id === active.id);
     if (activeItem) {
-      setActivePlatform(activeItem);
+      setActiveAgent(activeItem);
     }
   };
 
@@ -315,13 +421,13 @@ export default function Platforms({
       });
     }
     
-    setActivePlatform(null);
+    setActiveAgent(null);
   };
   
   const toggleSorting = () => {
     if (!isSorting) {
       // 进入排序模式
-      setSortedItems([...managementPlatforms]);
+      setSortedItems([...agents]);
     }
     setIsSorting(!isSorting);
   };
@@ -342,7 +448,7 @@ export default function Platforms({
         },
         body: JSON.stringify({
           items: sortData,
-          type: 'platform'
+          type: 'agent'
         }),
       });
       
@@ -350,9 +456,9 @@ export default function Platforms({
       
       if (result.success) {
         // 更新前端状态
-        setManagementPlatforms(sortedItems);
+        setAgents?.(sortedItems);
         setIsSorting(false);
-        message.success('排序更新成功');
+        message.success('Agent排序更新成功');
       } else {
         message.error(result.message || '保存排序时发生错误');
       }
@@ -366,7 +472,7 @@ export default function Platforms({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Title level={2} style={{ margin: 0 }}>
-          管理平台
+          AI Agent
         </Title>
         <Space>
           {/* 排序按钮 */}
@@ -391,14 +497,15 @@ export default function Platforms({
             </Button>
           )}
           
-          {/* 新增平台按钮 */}
+          {/* 新增Agent按钮 */}
           {!isSorting && (
             <Button
               icon={<PlusOutlined />}
-              onClick={() => onAddNew?.("platform")}
+              onClick={() => onAddNew?.("agent")}
               type="primary"
+              style={{ backgroundColor: token.colorWarning, borderColor: token.colorWarning }}
             >
-              新增平台
+              新增Agent
             </Button>
           )}
         </Space>
@@ -425,10 +532,10 @@ export default function Platforms({
               gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
               gap: 24
             }}>
-              {sortedItems.map((platform) => (
-                <SortablePlatformItem 
-                  key={platform.id}
-                  platform={platform}
+              {sortedItems.map((agent) => (
+                <SortableAgentItem 
+                  key={agent.id}
+                  agent={agent}
                   isSorting={isSorting}
                   onEdit={onEdit}
                   onDelete={onDelete}
@@ -437,7 +544,7 @@ export default function Platforms({
             </div>
           </SortableContext>
           <DragOverlay dropAnimation={dropAnimation} className="cursor-grabbing">
-            {activePlatform ? <PlatformCard platform={activePlatform} /> : null}
+            {activeAgent ? <AgentCard agent={activeAgent} /> : null}
           </DragOverlay>
         </DndContext>
       ) : (
@@ -446,99 +553,14 @@ export default function Platforms({
           gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
           gap: 24
         }}>
-          {managementPlatforms.map((platform) => {
-            const Icon = getIconByName(platform.iconName);
-            const platformColor = getColorByValue(platform.color);
-            const [isHovered, setIsHovered] = useState(false);
-            
-            return (
-              <div 
-                key={platform.id} 
-                className="gradient-border"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-              >
-                <Card
-                  hoverable
-                  style={{
-                    backgroundColor: 'white',
-                    height: 192
-                  }}
-                  styles={{
-                    body: { padding: 0 },
-                    header: { padding: '16px 20px', borderBottom: 'none' }
-                  }}
-                  title={
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Space align="center">
-                        <div
-                          style={{
-                            width: 48,
-                            height: 48,
-                            background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)`,
-                            borderRadius: token.borderRadiusLG,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <Icon className="h-6 w-6 text-white" />
-                        </div>
-                        <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
-                          {platform.name}
-                        </Title>
-                      </Space>
-                      <Space 
-                        size="small" 
-                        style={{ 
-                          opacity: isHovered ? 1 : 0,
-                          transition: 'opacity 0.2s ease-in-out'
-                        }}
-                      >
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<EditOutlined />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit?.(platform, "platform");
-                          }}
-                        />
-                        <Button
-                          type="text"
-                          size="small"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete?.(platform.id, "platform");
-                          }}
-                        />
-                      </Space>
-                    </div>
-                  }
-                >
-                  <div style={{ padding: '0 20px 20px' }}>
-                    <div style={{ minHeight: 20, marginBottom: 16 }}>
-                      {platform.description && (
-                        <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={platform.description}>
-                          {platform.description}
-                        </Text>
-                      )}
-                    </div>
-                    <Button
-                      block
-                      type="default"
-                      icon={<ExportOutlined />}
-                      onClick={() => openPlatform(platform.url, platform.urlType)}
-                    >
-                      访问平台
-                    </Button>
-                  </div>
-                </Card>
-              </div>
-            );
-          })}
+          {agents.map((agent) => (
+            <AgentCardItem
+              key={agent.id}
+              agent={agent}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
         </div>
       )}
     </div>

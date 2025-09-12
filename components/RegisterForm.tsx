@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import toast from "react-hot-toast";
+import { message } from "antd";
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -22,12 +22,12 @@ export default function RegisterForm({ onSuccess, onCancel, isDialog = false }: 
     e.preventDefault();
     
     if (!username || !password || !confirmPassword) {
-      toast.error("请填写所有必填字段");
+      message.error("请填写所有必填字段");
       return;
     }
     
     if (password !== confirmPassword) {
-      toast.error("两次输入的密码不一致");
+      message.error("两次输入的密码不一致");
       return;
     }
     
@@ -53,7 +53,7 @@ export default function RegisterForm({ onSuccess, onCancel, isDialog = false }: 
         throw new Error(data.message || "注册失败");
       }
       
-      toast.success("用户添加成功");
+      message.success("用户添加成功");
       
       // 清空表单
       setUsername("");
@@ -67,7 +67,7 @@ export default function RegisterForm({ onSuccess, onCancel, isDialog = false }: 
         onSuccess();
       }
     } catch (error: any) {
-      toast.error(error.message || "用户添加失败，请稍后重试");
+      message.error(error.message || "用户添加失败，请稍后重试");
     } finally {
       setLoading(false);
     }

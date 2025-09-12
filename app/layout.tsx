@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ClientSessionWrapper } from "@/components/SessionWrapper";
-import { Toaster } from "react-hot-toast";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider, theme } from "antd";
 import zhCN from 'antd/locale/zh_CN';
@@ -207,6 +206,12 @@ export default function RootLayout({
                   borderRadius: 8,
                   paddingInline: 16,
                   paddingBlock: 8,
+                  // 增强按钮动效配置
+                  motionDurationSlow: '0.2s',
+                  motionDurationMid: '0.1s',
+                  motionDurationFast: '0.05s',
+                  // 确保按钮有hover和focus状态
+                  algorithm: true,
                 },
                 Card: {
                   borderRadius: 12,
@@ -238,36 +243,6 @@ export default function RootLayout({
           >
             <ClientSessionWrapper>
               {children}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 3000,
-                  style: {
-                    background: '#333',
-                    color: '#fff',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                  },
-                  success: {
-                    style: {
-                      background: '#10B981',
-                    },
-                    iconTheme: {
-                      primary: 'white',
-                      secondary: '#10B981',
-                    },
-                  },
-                  error: {
-                    style: {
-                      background: '#EF4444',
-                    },
-                    iconTheme: {
-                      primary: 'white',
-                      secondary: '#EF4444',
-                    },
-                  },
-                }}
-              />
             </ClientSessionWrapper>
           </ConfigProvider>
         </AntdRegistry>
