@@ -135,6 +135,108 @@ function PlatformCard({ platform }: { platform: PlatformItem }) {
   );
 }
 
+// 平台卡片项组件 - 用于非排序模式
+interface PlatformCardItemProps {
+  platform: PlatformItem;
+  onEdit: ((item: PlatformItem | ServiceItem, type: string) => void) | undefined;
+  onDelete: ((id: string, type: string) => void) | undefined;
+}
+
+function PlatformCardItem({ platform, onEdit, onDelete }: PlatformCardItemProps) {
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
+  const [isHovered, setIsHovered] = useState(false);
+  const platformColor = getColorByValue(platform.color);
+  const Icon = getIconByName(platform.iconName);
+  
+  return (
+    <div 
+      className="gradient-border"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Card
+        hoverable
+        style={{
+          backgroundColor: 'white',
+          height: 192
+        }}
+        styles={{
+          body: { padding: 0 },
+          header: { padding: '16px 20px', borderBottom: 'none' }
+        }}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Space align="center">
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)`,
+                  borderRadius: token.borderRadiusLG,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Icon className="h-6 w-6 text-white" />
+              </div>
+              <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
+                {platform.name}
+              </Title>
+            </Space>
+            <Space 
+              size="small" 
+              style={{ 
+                opacity: isHovered ? 1 : 0,
+                transition: 'opacity 0.2s ease-in-out'
+              }}
+            >
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(platform, "platform");
+                }}
+              />
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.(platform.id, "platform");
+                }}
+              />
+            </Space>
+          </div>
+        }
+      >
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ minHeight: 20, marginBottom: 16 }}>
+            {platform.description && (
+              <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={platform.description}>
+                {platform.description}
+              </Text>
+            )}
+          </div>
+          <Button
+            block
+            type="default"
+            icon={<ExportOutlined />}
+            onClick={() => openPlatform(platform.url, platform.urlType)}
+          >
+            访问平台
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 // 排序项组件
 interface SortablePlatformItemProps {
   platform: PlatformItem;
@@ -446,99 +548,14 @@ export default function Platforms({
           gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
           gap: 24
         }}>
-          {managementPlatforms.map((platform) => {
-            const Icon = getIconByName(platform.iconName);
-            const platformColor = getColorByValue(platform.color);
-            const [isHovered, setIsHovered] = useState(false);
-            
-            return (
-              <div 
-                key={platform.id} 
-                className="gradient-border"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-              >
-                <Card
-                  hoverable
-                  style={{
-                    backgroundColor: 'white',
-                    height: 192
-                  }}
-                  styles={{
-                    body: { padding: 0 },
-                    header: { padding: '16px 20px', borderBottom: 'none' }
-                  }}
-                  title={
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Space align="center">
-                        <div
-                          style={{
-                            width: 48,
-                            height: 48,
-                            background: `linear-gradient(135deg, ${platformColor}, ${platformColor}cc)`,
-                            borderRadius: token.borderRadiusLG,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <Icon className="h-6 w-6 text-white" />
-                        </div>
-                        <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
-                          {platform.name}
-                        </Title>
-                      </Space>
-                      <Space 
-                        size="small" 
-                        style={{ 
-                          opacity: isHovered ? 1 : 0,
-                          transition: 'opacity 0.2s ease-in-out'
-                        }}
-                      >
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<EditOutlined />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit?.(platform, "platform");
-                          }}
-                        />
-                        <Button
-                          type="text"
-                          size="small"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete?.(platform.id, "platform");
-                          }}
-                        />
-                      </Space>
-                    </div>
-                  }
-                >
-                  <div style={{ padding: '0 20px 20px' }}>
-                    <div style={{ minHeight: 20, marginBottom: 16 }}>
-                      {platform.description && (
-                        <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={platform.description}>
-                          {platform.description}
-                        </Text>
-                      )}
-                    </div>
-                    <Button
-                      block
-                      type="default"
-                      icon={<ExportOutlined />}
-                      onClick={() => openPlatform(platform.url, platform.urlType)}
-                    >
-                      访问平台
-                    </Button>
-                  </div>
-                </Card>
-              </div>
-            );
-          })}
+          {managementPlatforms.map((platform) => (
+            <PlatformCardItem
+              key={platform.id}
+              platform={platform}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
         </div>
       )}
     </div>

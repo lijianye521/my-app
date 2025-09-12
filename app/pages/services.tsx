@@ -135,6 +135,108 @@ function ServiceCard({ service }: { service: ServiceItem }) {
   );
 }
 
+// 服务卡片项组件 - 用于非排序模式
+interface ServiceCardItemProps {
+  service: ServiceItem;
+  onEdit: ((item: PlatformItem | ServiceItem, type: string) => void) | undefined;
+  onDelete: ((id: string, type: string) => void) | undefined;
+}
+
+function ServiceCardItem({ service, onEdit, onDelete }: ServiceCardItemProps) {
+  const { token } = theme.useToken();
+  const { Title, Text } = Typography;
+  const [isHovered, setIsHovered] = useState(false);
+  const serviceColor = getColorByValue(service.color);
+  const Icon = getIconByName(service.iconName);
+  
+  return (
+    <div 
+      className="gradient-border"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Card
+        hoverable
+        style={{
+          backgroundColor: 'white',
+          height: 192
+        }}
+        styles={{
+          body: { padding: 0 },
+          header: { padding: '16px 20px', borderBottom: 'none' }
+        }}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Space align="center">
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  background: `linear-gradient(135deg, ${serviceColor}, ${serviceColor}cc)`,
+                  borderRadius: token.borderRadiusLG,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Icon className="h-6 w-6 text-white" />
+              </div>
+              <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
+                {service.name}
+              </Title>
+            </Space>
+            <Space 
+              size="small" 
+              style={{ 
+                opacity: isHovered ? 1 : 0,
+                transition: 'opacity 0.2s ease-in-out'
+              }}
+            >
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(service, "service");
+                }}
+              />
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.(service.id, "service");
+                }}
+              />
+            </Space>
+          </div>
+        }
+      >
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ minHeight: 20, marginBottom: 16 }}>
+            {service.description && (
+              <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={service.description}>
+                {service.description}
+              </Text>
+            )}
+          </div>
+          <Button
+            block
+            type="default"
+            icon={<ExportOutlined />}
+            onClick={() => openService(service.url, service.urlType)}
+          >
+            访问服务
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 // 排序项组件
 interface SortableServiceItemProps {
   service: ServiceItem;
@@ -445,99 +547,14 @@ export default function Services({
           gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
           gap: 24
         }}>
-          {techServices.map((service) => {
-            const Icon = getIconByName(service.iconName);
-            const serviceColor = getColorByValue(service.color);
-            const [isHovered, setIsHovered] = useState(false);
-            
-            return (
-              <div 
-                key={service.id} 
-                className="gradient-border"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-              >
-                <Card
-                  hoverable
-                  style={{
-                    backgroundColor: 'white',
-                    height: 192
-                  }}
-                  styles={{
-                    body: { padding: 0 },
-                    header: { padding: '16px 20px', borderBottom: 'none' }
-                  }}
-                  title={
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Space align="center">
-                        <div
-                          style={{
-                            width: 48,
-                            height: 48,
-                            background: `linear-gradient(135deg, ${serviceColor}, ${serviceColor}cc)`,
-                            borderRadius: token.borderRadiusLG,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <Icon className="h-6 w-6 text-white" />
-                        </div>
-                        <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
-                          {service.name}
-                        </Title>
-                      </Space>
-                      <Space 
-                        size="small" 
-                        style={{ 
-                          opacity: isHovered ? 1 : 0,
-                          transition: 'opacity 0.2s ease-in-out'
-                        }}
-                      >
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<EditOutlined />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit?.(service, "service");
-                          }}
-                        />
-                        <Button
-                          type="text"
-                          size="small"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete?.(service.id, "service");
-                          }}
-                        />
-                      </Space>
-                    </div>
-                  }
-                >
-                  <div style={{ padding: '0 20px 20px' }}>
-                    <div style={{ minHeight: 20, marginBottom: 16 }}>
-                      {service.description && (
-                        <Text type="secondary" style={{ fontSize: 13 }} ellipsis title={service.description}>
-                          {service.description}
-                        </Text>
-                      )}
-                    </div>
-                    <Button
-                      block
-                      type="default"
-                      icon={<ExportOutlined />}
-                      onClick={() => openService(service.url, service.urlType)}
-                    >
-                      访问服务
-                    </Button>
-                  </div>
-                </Card>
-              </div>
-            );
-          })}
+          {techServices.map((service) => (
+            <ServiceCardItem
+              key={service.id}
+              service={service}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
         </div>
       )}
     </div>

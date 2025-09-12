@@ -6,9 +6,11 @@ import {
   SettingOutlined,
   DatabaseOutlined,
   RiseOutlined,
+  RocketOutlined,
 } from "@ant-design/icons";
 import { PageProps } from "./types";
 import { iconOptions } from "./data";
+import { AgentItem } from "./agents";
 
 // 获取图标组件
 const getIconByName = (iconName: string) => {
@@ -38,8 +40,9 @@ function openItem(url: string, urlType?: string) {
 export default function Dashboard({
   managementPlatforms,
   techServices,
+  agents = [],
   onPageChange,
-}: PageProps & { onPageChange?: (page: string) => void }) {
+}: PageProps & { onPageChange?: (page: string) => void, agents?: AgentItem[] }) {
   const { token } = theme.useToken();
   const { Title, Text } = Typography;
   
@@ -50,7 +53,8 @@ export default function Dashboard({
   console.log('Dashboard组件接收数据:', { 
     managementPlatforms, 
     techServicesLength: techServices?.length,
-    managementPlatformsLength: managementPlatforms?.length
+    managementPlatformsLength: managementPlatforms?.length,
+    agentsLength: agents?.length
   });
 
   return (
@@ -217,6 +221,57 @@ export default function Dashboard({
               </div>
             </Space>
           </Card>
+          
+          <Card 
+            hoverable
+            style={{ 
+              borderRadius: token.borderRadiusLG,
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
+            }}
+            styles={{
+              body: { padding: '16px 20px' }
+            }}
+            onClick={() => onPageChange?.('ai-agent')}
+          >
+            <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+              <Space align="center" size="middle">
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  background: `linear-gradient(135deg, #8b5cf6, #7c3aed)`,
+                  borderRadius: token.borderRadiusLG,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: token.boxShadowSecondary
+                }}>
+                  <RocketOutlined style={{ fontSize: 24, color: 'white' }} />
+                </div>
+                <div>
+                  <Title level={4} style={{ margin: 0, color: token.colorText }}>
+                    AI Agent
+                  </Title>
+                  <Text type="secondary" style={{ fontSize: 14 }}>
+                    智能助手
+                  </Text>
+                </div>
+              </Space>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ 
+                  fontSize: 28, 
+                  fontWeight: 'bold', 
+                  color: '#8b5cf6',
+                  lineHeight: 1
+                }}>
+                  {agents.length}
+                </div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  个Agent
+                </Text>
+              </div>
+            </Space>
+          </Card>
         </div>
       </div>
 
@@ -287,6 +342,43 @@ export default function Dashboard({
                     </div>
                   </div>
                   <ExportOutlined style={{ fontSize: '16px' }} className="text-gray-400 group-hover:text-blue-600" />
+                </div>
+              );
+            })}
+          </div>
+      </Card>
+      
+      {/* AI Agent */}
+      <Card
+        title={
+          <Space align="center">
+            <RocketOutlined style={{ fontSize: 20, color: '#8b5cf6' }} />
+            <Title level={4} style={{ margin: 0 }}>AI Agent</Title>
+          </Space>
+        }
+        style={{ borderRadius: token.borderRadiusLG }}
+      >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {agents.map((agent) => {
+              const Icon = getIconByName(agent.iconName);
+              return (
+                <div
+                  key={agent.id}
+                  className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer group"
+                  onClick={() => openItem(agent.url, agent.urlType)}
+                >
+                  <div className={`w-10 h-10 ${agent.color || 'bg-purple-500'} rounded-lg flex items-center justify-center`}>
+                    <Icon className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium group-hover:text-purple-600">
+                      {agent.name}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {agent.description}
+                    </div>
+                  </div>
+                  <ExportOutlined style={{ fontSize: '16px' }} className="text-gray-400 group-hover:text-purple-600" />
                 </div>
               );
             })}

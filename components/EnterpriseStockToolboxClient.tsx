@@ -252,7 +252,7 @@ export default function EnterpriseStockToolboxClient({
 
     switch (activeSection) {
       case "dashboard":
-        return <Dashboard {...commonProps} onPageChange={setActiveSection} />;
+        return <Dashboard {...commonProps} agents={agents} onPageChange={setActiveSection} />;
       case "platforms":
         return <Platforms {...commonProps} />;
       case "services":
@@ -268,7 +268,7 @@ export default function EnterpriseStockToolboxClient({
       case "coming-soon":
         return <ComingSoon />;
       default:
-        return <Dashboard {...commonProps} onPageChange={setActiveSection} />;
+        return <Dashboard {...commonProps} agents={agents} onPageChange={setActiveSection} />;
     }
   };
 
