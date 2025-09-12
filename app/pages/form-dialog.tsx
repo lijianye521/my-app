@@ -1,20 +1,43 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, Option } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Settings } from "lucide-react";
+import { useState, useEffect, forwardRef } from "react";
+import { 
+  Button, 
+  Input, 
+  Modal, 
+  Form, 
+  Select, 
+  Typography, 
+  Space, 
+  theme
+} from "antd";
+import TextArea from "antd/es/input/TextArea";
+import { SettingOutlined } from "@ant-design/icons";
 import { FormDataType, PlatformItem, ServiceItem, UrlType } from "./types";
 import { iconOptions, colorOptions, urlTypeOptions } from "./data";
+
+// 创建一个适配器组件，将Lucide图标转换为兼容Ant Design的组件
+interface LucideIconWrapperProps {
+  icon: React.ComponentType<any>;
+  style?: {
+    fontSize?: number;
+    color?: string;
+  };
+  [key: string]: any;
+}
+
+const LucideIconWrapper = forwardRef<unknown, LucideIconWrapperProps>(
+  ({ icon: Icon, style, ...props }, ref) => {
+    // 传递必要的属性并保持ref引用
+    return Icon ? (
+      <Icon 
+        ref={ref} 
+        {...props} 
+        size={style?.fontSize || 16} 
+        color={style?.color || 'currentColor'}
+        style={{ color: style?.color || 'currentColor', ...style }}
+      />
+    ) : null;
+  }
+);
 
 interface FormDialogProps {
   isOpen: boolean;
@@ -31,253 +54,275 @@ export default function FormDialog({
   editingItem,
   itemType,
 }: FormDialogProps) {
-  const [formData, setFormData] = useState<FormDataType>({
-    name: editingItem?.name || "",
-    description: editingItem?.description || "",
-    url: editingItem?.url || "",
-    icon: editingItem?.iconName || "Settings",  // 修正这里，使用iconName
-    color: editingItem?.color || "bg-blue-500",
-    urlType: (editingItem?.urlType as UrlType) || "internal",
-    otherInformation: editingItem?.otherInformation || "",
-  });
-
-  // 添加useEffect，当editingItem变化时重新设置表单数据
-  useEffect(() => {
-    if (editingItem) {
-      setFormData({
-        name: editingItem.name || "",
-        description: editingItem.description || "",
-        url: editingItem.url || "",
-        icon: editingItem.iconName || "Settings",  // 修正这里，使用iconName
-        color: editingItem.color || "bg-blue-500",
-        urlType: (editingItem.urlType as UrlType) || "internal",
-        otherInformation: editingItem.otherInformation || "",
-      });
-    } else {
-      // 当创建新项目时重置表单
-      resetForm();
-    }
-  }, [editingItem]);
-
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      description: "",
-      url: "",
-      icon: "Settings",
-      color: "bg-blue-500",
-      urlType: "internal",
-      otherInformation: "",
-    });
-  };
+  const { token } = theme.useToken();
+  const [form] = Form.useForm();
+  const { Title, Text, Paragraph } = Typography;
 
   const handleClose = () => {
-    resetForm();
+    form.resetFields();
     onClose();
   };
 
-  const handleSubmit = () => {
-    if (!formData.name || !formData.url) {
-      alert("请填写名称和链接地址");
-      return;
-    }
-    onSubmit(formData);
+  const handleSubmit = (values: FormDataType) => {
+    onSubmit(values);
     handleClose();
   };
 
-  const renderIconGrid = () => {
-    return (
-      <div className="grid grid-cols-6 gap-3 max-h-48 overflow-y-auto p-2 border rounded">
-        {iconOptions.map((option) => {
-          const IconComponent = option.icon;
-          return (
-            <div
-              key={option.value}
-              className={`p-2 rounded cursor-pointer hover:bg-gray-100 flex flex-col items-center gap-1 ${
-                formData.icon === option.value
-                  ? "bg-blue-100 border-blue-500 border-2"
-                  : "border"
-              }`}
-              onClick={() => setFormData({ ...formData, icon: option.value })}
-              title={option.label}
-            >
-              <IconComponent className="h-4 w-4" />
-              <span className="text-xs text-center">{option.label}</span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
+  // 当editingItem变化时，重置表单数据
+  const [selectedIcon, setSelectedIcon] = useState<string>("Settings");
+  const [selectedColor, setSelectedColor] = useState<string>("bg-blue-500");
 
-  const renderColorGrid = () => {
-    return (
-      <div className="grid grid-cols-10 gap-2 p-2 border rounded">
-        {colorOptions.map((option) => (
-          <div
-            key={option.value}
-            className={`w-8 h-8 rounded cursor-pointer border-2 ${
-              formData.color === option.value
-                ? "border-gray-800"
-                : "border-gray-300"
-            }`}
-            style={{ backgroundColor: option.color }}
-            onClick={() => setFormData({ ...formData, color: option.value })}
-            title={option.label}
-          />
-        ))}
-      </div>
-    );
-  };
+  useEffect(() => {
+    if (editingItem) {
+      const iconName = editingItem.iconName || "Settings";
+      const color = editingItem.color || "bg-blue-500";
+      
+      setSelectedIcon(iconName);
+      setSelectedColor(color);
+      
+      form.setFieldsValue({
+        name: editingItem.name,
+        description: editingItem.description,
+        url: editingItem.url,
+        icon: iconName,
+        color: color,
+        urlType: editingItem.urlType || 'internal',
+        otherInformation: editingItem.otherInformation
+      });
+    } else {
+      setSelectedIcon("Settings");
+      setSelectedColor("bg-blue-500");
+      form.resetFields();
+    }
+  }, [editingItem, form]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden">
-        <div className="max-h-[75vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {editingItem ? "编辑" : "新增"}
-            {itemType === "platform" ? "管理平台" : "技术服务"}
-          </DialogTitle>
-          <DialogDescription>
+    <Modal
+      title={
+        <div>
+          <Title level={5} style={{ margin: 0 }}>
+            {editingItem ? "编辑" : "新增"}{itemType === "platform" ? "管理平台" : "技术服务"}
+          </Title>
+          <Paragraph type="secondary" style={{ margin: 0, fontSize: 14 }}>
             请填写{itemType === "platform" ? "管理平台" : "技术服务"}的基本信息
-          </DialogDescription>
-        </DialogHeader>
+          </Paragraph>
+        </div>
+      }
+      open={isOpen}
+      onCancel={handleClose}
+      footer={[
+        <Button key="cancel" onClick={handleClose}>
+          取消
+        </Button>,
+        <Button 
+          key="submit" 
+          type="primary" 
+          onClick={() => form.submit()}
+        >
+          {editingItem ? "保存" : "添加"}
+        </Button>,
+      ]}
+      width={800}
+      styles={{ 
+        body: { 
+          maxHeight: '70vh', 
+          overflowY: 'auto', 
+          padding: '12px 24px' 
+        } 
+      }}
+    >
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">名称 *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="请输入名称"
-            />
-          </div>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{
+            name: "",
+            description: "",
+            url: "",
+            icon: "Settings",
+            color: "bg-blue-500",
+            urlType: "internal",
+            otherInformation: ""
+          }}
+        >
+          <Form.Item
+            name="name"
+            label="名称"
+            rules={[{ required: true, message: '请输入名称' }]}
+          >
+            <Input placeholder="请输入名称" />
+          </Form.Item>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">描述</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
+          <Form.Item
+            name="description"
+            label="描述"
+          >
+            <TextArea 
               placeholder="请输入描述信息"
               rows={3}
             />
-          </div>
+          </Form.Item>
 
-          <div className="space-y-2">
-            <Label htmlFor="urlType">链接类型 *</Label>
-            <Select
-              value={formData.urlType}
-              onChange={(value: UrlType) =>
-                setFormData({ ...formData, urlType: value })
-              }
-              className="w-full"
-              placeholder="请选择链接类型"
-            >
+          <Form.Item
+            name="urlType"
+            label="链接类型"
+            rules={[{ required: true, message: '请选择链接类型' }]}
+          >
+            <Select placeholder="请选择链接类型">
               {urlTypeOptions.map((option) => (
-                <Option key={option.value} value={option.value}>
+                <Select.Option key={option.value} value={option.value}>
                   {option.label} - {option.description}
-                </Option>
+                </Select.Option>
               ))}
             </Select>
-          </div>
+          </Form.Item>
 
-          <div className="space-y-2">
-            <Label htmlFor="url">
-              {formData.urlType === 'terminal' ? '终端命令' : '链接地址'} *
-            </Label>
+          <Form.Item
+            name="url"
+            label={form.getFieldValue('urlType') === 'terminal' ? '终端命令' : '链接地址'}
+            rules={[{ required: true, message: '请输入链接地址或终端命令' }]}
+          >
             <Input
-              id="url"
-              value={formData.url}
-              onChange={(e) =>
-                setFormData({ ...formData, url: e.target.value })
-              }
               placeholder={
-                formData.urlType === 'terminal'
+                form.getFieldValue('urlType') === 'terminal'
                   ? "请输入windlocal命令，如：windlocal://open?cmd=notepad"
-                  // : formData.urlType === 'internal_terminal'
-                  // ? "请输入相对路径，如：/api/test（会自动与当前域名拼接）"
                   : "请输入链接地址，如：http://10.106.19.29:8090/"
               }
             />
-          </div>
+          </Form.Item>
 
-          <div className="space-y-2">
-            <Label htmlFor="otherInformation">其他信息</Label>
-            <Textarea
-              id="otherInformation"
-              value={formData.otherInformation}
-              onChange={(e) =>
-                setFormData({ ...formData, otherInformation: e.target.value })
-              }
+          <Form.Item
+            name="otherInformation"
+            label="其他信息"
+          >
+            <TextArea
               placeholder="请输入其他信息（可选，JSON格式）"
               rows={2}
             />
-          </div>
+          </Form.Item>
 
-          <div className="space-y-2">
-            <Label>选择图标</Label>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">当前选择：</span>
+          <Form.Item label="选择图标" name="icon">
+            <div>
+              <Space align="center" style={{ marginBottom: 8 }}>
+                <Text type="secondary">当前选择：</Text>
                 <div
-                  className={`w-8 h-8 ${formData.color} rounded flex items-center justify-center`}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    backgroundColor: colorOptions.find(opt => opt.value === selectedColor)?.color || '#3b82f6',
+                    borderRadius: token.borderRadiusLG,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
                 >
                   {(() => {
-                    const IconComponent =
-                      iconOptions.find((opt) => opt.value === formData.icon)
-                        ?.icon || Settings;
-                    return <IconComponent className="h-4 w-4 text-white" />;
+                    const iconOption = iconOptions.find((opt) => opt.value === selectedIcon);
+                    return (
+                      <LucideIconWrapper 
+                        icon={iconOption?.icon} 
+                        style={{ color: '#fff', fontSize: 16 }} 
+                      />
+                    );
                   })()}
                 </div>
-                <span className="text-sm">
-                  {iconOptions.find((opt) => opt.value === formData.icon)
-                    ?.label || "设置"}
-                </span>
+                <Text>
+                  {iconOptions.find((opt) => opt.value === selectedIcon)?.label || "设置"}
+                </Text>
+              </Space>
+              <div style={{ 
+                display: 'grid',
+                gridTemplateColumns: 'repeat(6, 1fr)', 
+                gap: 8, 
+                maxHeight: 192, 
+                overflowY: 'auto',
+                padding: 8,
+                border: `1px solid ${token.colorBorderSecondary}`,
+                borderRadius: token.borderRadiusLG
+              }}>
+                {iconOptions.map((option) => (
+                  <div
+                    key={option.value}
+                    onClick={() => {
+                      setSelectedIcon(option.value);
+                      form.setFieldValue('icon', option.value);
+                    }}
+                      style={{
+                        padding: 8,
+                        borderRadius: token.borderRadius,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 4,
+                        // 统一使用2px边框，只改变颜色，不改变粗细
+                        border: selectedIcon === option.value 
+                          ? `2px solid ${token.colorPrimary}` 
+                          : `2px solid transparent`,
+                        backgroundColor: 'transparent',
+                        boxSizing: 'border-box'
+                      }}
+                  >
+                    <LucideIconWrapper 
+                      icon={option.icon} 
+                      style={{ fontSize: 16 }} 
+                    />
+                    <Text style={{ fontSize: 12 }}>{option.label}</Text>
+                  </div>
+                ))}
               </div>
-              {renderIconGrid()}
             </div>
-          </div>
+          </Form.Item>
 
-          <div className="space-y-2">
-            <Label>选择颜色</Label>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">当前选择：</span>
+          <Form.Item label="选择颜色" name="color">
+            <div>
+              <Space align="center" style={{ marginBottom: 8 }}>
+                <Text type="secondary">当前选择：</Text>
                 <div
-                  className="w-6 h-6 rounded border"
                   style={{
-                    backgroundColor:
-                      colorOptions.find((opt) => opt.value === formData.color)
-                        ?.color || "#3b82f6",
+                    width: 24,
+                    height: 24,
+                    backgroundColor: colorOptions.find((opt) => opt.value === selectedColor)?.color || '#3b82f6',
+                    borderRadius: token.borderRadiusLG,
+                    border: `1px solid ${token.colorBorderSecondary}`
                   }}
                 />
-                <span className="text-sm">
-                  {colorOptions.find((opt) => opt.value === formData.color)
-                    ?.label || "蓝色"}
-                </span>
+                <Text>
+                  {colorOptions.find((opt) => opt.value === selectedColor)?.label || "蓝色"}
+                </Text>
+              </Space>
+              <div style={{ 
+                display: 'grid',
+                gridTemplateColumns: 'repeat(10, 1fr)', 
+                gap: 8, 
+                padding: 8,
+                border: `1px solid ${token.colorBorderSecondary}`,
+                borderRadius: token.borderRadiusLG
+              }}>
+                {colorOptions.map((option) => (
+                  <div
+                    key={option.value}
+                    onClick={() => {
+                      setSelectedColor(option.value);
+                      form.setFieldValue('color', option.value);
+                    }}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        backgroundColor: option.color,
+                        borderRadius: token.borderRadiusLG,
+                        cursor: 'pointer',
+                        boxShadow: selectedColor === option.value
+                          ? `0 0 0 2px white, 0 0 0 4px ${token.colorPrimary}`
+                          : 'none'
+                      }}
+                  />
+                ))}
               </div>
-              {renderColorGrid()}
             </div>
-          </div>
-        </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
-            取消
-          </Button>
-          <Button onClick={handleSubmit}>
-            {editingItem ? "保存" : "添加"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </Form.Item>
+        </Form>
+    </Modal>
   );
 }
