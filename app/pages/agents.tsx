@@ -503,7 +503,7 @@ export default function Agents({
               icon={<PlusOutlined />}
               onClick={() => onAddNew?.("agent")}
               type="primary"
-              style={{ backgroundColor: token.colorWarning, borderColor: token.colorWarning }}
+              // style={}
             >
               新增Agent
             </Button>

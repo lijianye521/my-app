@@ -79,7 +79,7 @@ export default function ComingSoon({ title = "敬请期待" }: ComingSoonProps) 
               fontWeight: 600,
               color: token.colorPrimary
             }}>
-              预计2025.9.12日前上线
+              预计2025.9.24日前上线
             </Text>
           </div>
         </div>
