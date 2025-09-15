@@ -529,14 +529,16 @@ export default function UsersManagement() {
             title: '用户名',
             dataIndex: 'username',
             key: 'username',
+            width: 100,
+
             render: (text) => <Text strong>{text}</Text>,
           },
-          {
-            title: '密码 (加密存储)',
-            dataIndex: 'password',
-            key: 'password',
-            render: (text) => <Text code style={{ fontSize: '12px' }}>{text}</Text>,
-          },
+          // {
+          //   title: '密码 (加密存储)',
+          //   dataIndex: 'password',
+          //   key: 'password',
+          //   render: (text) => <Text code style={{ fontSize: '12px' }}>{text}</Text>,
+          // },
           {
             title: '昵称',
             dataIndex: 'nickname',
