@@ -1,8 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { message } from "antd";
+import { message, Button, Form, Input } from "antd";
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -18,8 +15,7 @@ export default function RegisterForm({ onSuccess, onCancel, isDialog = false }: 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: any) => {
     
     if (!username || !password || !confirmPassword) {
       message.error("请填写所有必填字段");
@@ -34,7 +30,12 @@ export default function RegisterForm({ onSuccess, onCancel, isDialog = false }: 
     setLoading(true);
     
     try {
-      const response = await fetch("/api/auth/register", {
+      // 根据是否在对话框模式中选择不同的API端点
+      const endpoint = isDialog ? "/api/users/add" : "/api/auth/register";
+      
+      console.log(`正在提交用户数据到: ${endpoint}`);
+      
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -48,12 +49,13 @@ export default function RegisterForm({ onSuccess, onCancel, isDialog = false }: 
       });
       
       const data = await response.json();
+      console.log('API响应:', data);
       
       if (!response.ok) {
-        throw new Error(data.message || "注册失败");
+        throw new Error(data.message || "操作失败");
       }
       
-      message.success("用户添加成功");
+      message.success(isDialog ? "用户添加成功" : "注册成功");
       
       // 清空表单
       setUsername("");
@@ -67,92 +69,94 @@ export default function RegisterForm({ onSuccess, onCancel, isDialog = false }: 
         onSuccess();
       }
     } catch (error: any) {
-      message.error(error.message || "用户添加失败，请稍后重试");
+      console.error('提交失败:', error);
+      message.error(error.message || "操作失败，请稍后重试");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="username">用户名 <span className="text-red-500">*</span></Label>
+    <Form onFinish={handleSubmit} layout="vertical" style={{ marginTop: '16px' }}>
+      <Form.Item 
+        label="用户名" 
+        required
+        tooltip="用户登录时使用的名称"
+      >
         <Input
-          id="username"
           placeholder="请输入用户名"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          required
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="nickname">昵称</Label>
+      </Form.Item>
+      
+      <Form.Item label="昵称">
         <Input
-          id="nickname"
           placeholder="请输入昵称"
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="email">邮箱</Label>
+      </Form.Item>
+      
+      <Form.Item label="邮箱">
         <Input
-          id="email"
-          type="email"
           placeholder="请输入邮箱"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">密码 <span className="text-red-500">*</span></Label>
-        <Input
-          id="password"
-          type="password"
+      </Form.Item>
+      
+      <Form.Item 
+        label="密码" 
+        required
+        tooltip="请设置安全的密码"
+      >
+        <Input.Password
           placeholder="请输入密码"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">确认密码 <span className="text-red-500">*</span></Label>
-        <Input
-          id="confirmPassword"
-          type="password"
+      </Form.Item>
+      
+      <Form.Item 
+        label="确认密码" 
+        required
+      >
+        <Input.Password
           placeholder="请再次输入密码"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          required
         />
-      </div>
+      </Form.Item>
 
-      {isDialog ? (
-        <div className="flex justify-end gap-2 pt-4">
+      <Form.Item className="mb-0">
+        {isDialog ? (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+            <Button
+              onClick={onCancel}
+              disabled={loading}
+            >
+              取消
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+            >
+              添加用户
+            </Button>
+          </div>
+        ) : (
           <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={loading}
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            style={{ width: '100%' }}
           >
-            取消
+            注册
           </Button>
-          <Button
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? "注册中..." : "添加用户"}
-          </Button>
-        </div>
-      ) : (
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={loading}
-        >
-          {loading ? "注册中..." : "注册"}
-        </Button>
-      )}
-    </form>
+        )}
+      </Form.Item>
+    </Form>
   );
 }

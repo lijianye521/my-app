@@ -10,7 +10,10 @@
       "Bash(taskkill:*)",
       "Bash(mysqld:*)",
       "Bash(timeout:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(tasklist)",
+      "Bash(findstr:*)",
+      "Bash(net start:*)"
     ],
     "deny": [],
     "ask": []

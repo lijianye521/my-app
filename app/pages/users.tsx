@@ -623,6 +623,7 @@ export default function UsersManagement() {
             hasInitialFetchedRef.current = false;
             fetchUsers();
           }} 
+          onCancel={() => setIsAddUserModalOpen(false)}
           isDialog={true} 
         />
       </Modal>
